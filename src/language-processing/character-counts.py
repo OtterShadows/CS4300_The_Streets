@@ -4,16 +4,14 @@ from collections import Counter
 
 #first function get counts of characters output to  text file
 nlp = spacy.load("en_core_web_sm")
-docs = pd.read_csv("PLACEHOLDER CSV")
+docs = pd.read_csv("data/data_set.csv")
 comments = docs["comment"].dropna().tolist()
-def charCount():
-    docs = docs
-    comments = comments
-    character_counts = Counter()
 
-    for doc in nlp.pipe(docs, batch_size = 1000):
+def charCount():
+    character_counts = Counter()
+    for doc in nlp.pipe(comments, batch_size=1000):
         for ent in doc.ents:
-            if ent.label == "PERSON":
+            if ent.label_ == "PERSON":
                 character_counts[ent.text] += 1
     return character_counts
 
