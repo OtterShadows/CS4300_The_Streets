@@ -4,8 +4,8 @@ from collections import Counter
 
 #first function get counts of characters output to  text file
 nlp = spacy.load("en_core_web_sm")
-docs = pd.read_csv("data/data_set.csv")
-comments = docs["comment"].dropna().tolist()
+docs = pd.read_csv("data/piratefolk_comments.csv")
+comments = docs["text"].dropna().tolist()
 
 def charCount():
     character_counts = Counter()
@@ -24,7 +24,7 @@ def createReversePostings():
     comments = comments
     reverse_postings = {}
 
-    texts = docs["comment"].astype(str)
+    texts = docs["text"].astype(str)
     ids = docs["id"]
 
     for doc, comment_id in zip(nlp.pipe(texts, batch_size = 1000), ids):
@@ -35,8 +35,8 @@ def createReversePostings():
 
     return reverse_postings
 
-print(charCount)
-print(createReversePostings)
+print(charCount())
+print(createReversePostings())
 
 
     
