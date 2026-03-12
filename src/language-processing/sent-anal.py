@@ -7,4 +7,4 @@
 #plot and output to image
 
 def plot_discussion(characterName):
-    reverse_postings = create
+    return
