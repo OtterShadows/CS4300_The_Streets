@@ -2,6 +2,7 @@ import pandas as pd
 import spacy
 from collections import Counter
 import csv
+from collections import defaultdict
 
 #first function get counts of characters output to  text file
 nlp = spacy.load("en_core_web_sm")
@@ -30,9 +31,9 @@ def write_char_counts_to_csv(character_counts: Counter, output_path: str):
 def createReversePostings():
     # docs = docs
     # comments = comments
-    reverse_postings = {}
+    reverse_postings = defaultdict(list)
 
-    texts = docs["text"].astype(str)
+    texts = docs["text"].fillna("").astype(str)
     ids = docs["id"]
 
     for doc, comment_id in zip(nlp.pipe(texts, batch_size = 1000), ids):
@@ -42,6 +43,31 @@ def createReversePostings():
             reverse_postings[person].append(comment_id)
 
     return reverse_postings
+def write_counts_to_csv(filename="character_counts.csv"):
+    counts = charCount()
+    
+    df = pd.DataFrame(counts.items(), columns=["character", "count"])
+    df = df.sort_values(by="count", ascending=False)
+
+    df.to_csv(filename, index=False)
+def write_reverse_postings_to_csv(filename="reverse_postings.csv"):
+    reverse_postings = createReversePostings()
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(
+        [(person, ids) for person, ids in reverse_postings.items()],
+        columns=["character", "comment_ids"]
+    )
+    
+    # Optionally convert list to string for CSV
+    df["comment_ids"] = df["comment_ids"].apply(lambda x: ",".join(map(str, x)))
+    
+    # Write to CSV
+    df.to_csv(filename, index=False, encoding="utf-8")
+
+# Run it
+write_reverse_postings_to_csv()
+#write_counts_to_csv()
 
 
 char_count = charCount()
