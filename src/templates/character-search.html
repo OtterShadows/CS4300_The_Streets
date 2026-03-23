@@ -221,28 +221,6 @@
             let characterKey = null;
             console.log(`performSearch called with query: "${query}"`);
 
-            // // Map queries to characters based on intent
-            // if (query.includes('goat') || query.includes('best') || query.includes('greatest')) {
-            //     characterKey = 'luffy';
-            // } else if (query.includes('fraud') || query.includes('overrated') || query.includes('bad')) {
-            //     characterKey = 'nami';
-            // } else if (query.includes('fell off') || query.includes('decline') || query.includes('drop')) {
-            //     characterKey = 'zoro';
-            // } else {
-            //     // Direct character name search
-            //     for (const key in mockCharacterData) {
-            //         if (query.includes(key) || mockCharacterData[key].name.toLowerCase().includes(query)) {
-            //             characterKey = key;
-            //             break;
-            //         }
-            //     }
-            // }
-
-            // // Default to Luffy if no match
-            // if (!characterKey) {
-            //     characterKey = 'luffy';
-            // }
-
             fetch(`/episodes?title=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
@@ -253,7 +231,6 @@
                     console.error("Error fetching from backend:", error)
                 })
 
-            // displayCharacterResults(characterKey, query); // commented out, using backend data now
         }
 
         function displayResultsFromBackend(data, query) {

@@ -24,7 +24,7 @@ def edit_distance(source: str, target: str):
             if target[j - 1] == source[i - 1]:
                 substitution = D[i-1, j-1] + 0
             else: 
-                substitution = D[i-1,j-1] + 2
+                substitution = D[i-1,j-1] + 1
             D[i,j] = min(deletion, insertion, substitution)
     return D[len(source), len(target)]
 
@@ -166,6 +166,13 @@ def get_character_rating_over_time(character: str, k: int, start_timestamp=start
         scores.append(score)
     return scores
 
+def num_mentions(character: str):
+    count = 0
+    for comment in comments:
+        comment_text = comment["text"]
+        if fuzzy_term_match(character, comment_text, 2):
+            count += 1
+    return count
 
 
 
