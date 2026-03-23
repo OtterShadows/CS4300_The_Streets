@@ -21,26 +21,32 @@ def json_search(query):
     name = similarity_calc.match_name(query, similarity_calc.char_list)
     print("\033[32m" + "Name: " + name + "\033[0m")
 
-    matches = similarity_calc.retrieve_k_docs(name, similarity_calc.tfidf_matrix, 10, similarity_calc.vectorizer, similarity_calc.ids, similarity_calc.docs)
+    matches = similarity_calc.retrieve_k_docs(query, similarity_calc.tfidf_matrix, 10, similarity_calc.vectorizer, similarity_calc.ids, similarity_calc.docs)
     summary = "Summary..."
     retrieved = matches
 
-    character_score = similarity_calc.get_character_rating(name)
-    rating = similarity_calc.to_star_rating(character_score)
+    # character_score = similarity_calc.get_character_rating(name)
+
+    print("\033[32m" + "Calculating trend_data..." + "\033[0m")
+    trend_data = similarity_calc.get_star_rating_over_time(name, 5)
+    print("\033[32m" + "Calculating trend_stars..." + "\033[0m")
+    trend_stars = [round(v, 2) for v in trend_data.values()]
+    print("\033[32m" + "Calculating trend_dates..." + "\033[0m")
+    trend_dates = list(trend_data.keys())
+
+
+    print("\033[32m" + "Calculating rating..." + "\033[0m")
+    rating = sum(trend_stars) / len(trend_stars)
     print("\033[32m" + "Rating: " + str(rating) + "\033[0m")
 
-    # convert comments and rating vibes
     mentions = similarity_calc.num_mentions(name)
-    if character_score >= 0.3:
+    # mentions = 0
+    if rating >= 6:
         consensus = "Positive"
-    elif character_score <= -0.3:
+    elif rating <= 4:
         consensus = "Negative"
     else:
         consensus = "Neutral"
-
-    trend_data = similarity_calc.get_star_rating_over_time(name, 5)
-    trend_stars = [round(v, 2) for v in trend_data.values()]
-    trend_dates = list(trend_data.keys())
 
     return json.dumps({
         "name": name,

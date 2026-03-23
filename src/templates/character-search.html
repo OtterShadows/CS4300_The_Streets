@@ -297,7 +297,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: '',
+                            label: 'Star rating for "' + query + '"',
                             data: trendValues,
                             borderColor: '#4285F4',
                             backgroundColor: 'rgba(66, 133, 244, 0.1)',
@@ -312,7 +312,7 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: { beginAtZero: true },
+                            y: { min: 0, max: 10 },
                             x: { ticks: { display: true } }
                         }
                     }
