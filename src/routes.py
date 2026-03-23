@@ -21,8 +21,8 @@ def json_search(query):
     name = similarity_calc.match_name(query, similarity_calc.char_list)
     print("\033[32m" + "Name: " + name + "\033[0m")
 
-    matches = similarity_calc.retrieve_k_docs(query, similarity_calc.tfidf_matrix, 10, similarity_calc.vectorizer, similarity_calc.ids, similarity_calc.docs)
-    summary = "Summary..."
+    matches = similarity_calc.retrieve_k_docs(name, similarity_calc.tfidf_matrix, 10, similarity_calc.vectorizer, similarity_calc.ids, similarity_calc.docs)
+    summary = "Summary to be implemented."
     retrieved = matches
 
     # character_score = similarity_calc.get_character_rating(name)
