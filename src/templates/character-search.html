@@ -241,14 +241,15 @@
             document.getElementById('hero-summary').textContent = data.summary || `Results for "${query}" based on community discussion.`;
             document.getElementById('hero-rank').textContent = data.rating > 8 ? 'GOAT' : data.rating > 6 ? 'S' : 'A';
 
-            document.getElementById('grid-rating').textContent = data.rating;
-            document.getElementById('grid-sentiment').textContent = data.rating > 0.5 ? 'Positive' : data.rating < -0.5 ? 'Negative' : 'Neutral';
-            document.getElementById('grid-comments').textContent = data.retrieved.length;
+            document.getElementById('grid-rating').textContent = data.rating.toFixed ? data.rating.toFixed(1) : data.rating;
+            document.getElementById('grid-sentiment').textContent = data.consensus || (data.rating > 8 ? 'Very Positive' : data.rating > 6 ? 'Positive' : 'Neutral');
+            document.getElementById('grid-comments').textContent = data.mentions || data.retrieved.length;
 
             document.getElementById('query-term').textContent = query;
             document.getElementById('retrieved-count').textContent = data.retrieved.length;
 
             updateRetrievedFromBackend(data.retrieved);
+            updateChartFromBackend(data.trend, data.trend_dates, query);
 
             resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -273,6 +274,53 @@
                 `;
                 retrievedContainer.appendChild(commentEl);
             });
+        }
+
+        function updateChartFromBackend(trendValues, trendDates, query) {
+            try {
+                const chartCanvas = document.getElementById('ratingsChart');
+                if (!chartCanvas) {
+                    console.error('Chart canvas not found');
+                    return;
+                }
+
+                const ctx = chartCanvas.getContext('2d');
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                const labels = trendDates || trendValues.map((v, idx) => `T${idx + 1}`);
+
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '',
+                            data: trendValues,
+                            borderColor: '#4285F4',
+                            backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#4285F4',
+                            pointBorderColor: '#fff',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true },
+                            x: { ticks: { display: true } }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error updating backend chart:', error);
+            }
         }
 
         function displayCharacterResults(characterKey, query) {
