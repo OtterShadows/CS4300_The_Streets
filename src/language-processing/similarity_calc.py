@@ -7,6 +7,32 @@ import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 
+
+#JW function for returning keyword for a given query. multiword
+# queries will be treated as a vecotr to compare against character name vecotrs.
+rp = pd.read_csv("src/language_processing/reverse_postings.csv")
+pfc = pd.read_csv("data/piratefolk_comments.csv")
+
+def get_comments_by_character(character):
+    row = rp[rp["character"] == character]
+    if row.empty:
+        return []
+    id_string = row.iloc[0]["comment_ids"]
+    ids = id_string.split(",")
+    
+    # get matching comments
+    comments = pfc[pfc["id"].isin(ids)]["text"].tolist()
+    
+    return comments
+
+def create_character_docs():
+    character_docs = {}
+    for character in rp["character"]:
+        comments = get_comments_by_character(character)
+        character_docs[character] = " ".join(comments)
+    return character_docs
+
+
 # Helper to match_name
 def edit_distance(source: str, target: str):
     D = np.zeros((len(source) + 1, len(target) + 1))
@@ -177,4 +203,4 @@ def retrieve_k_docs_test():
 
 
 
-retrieve_k_docs_test()
+#retrieve_k_docs_test()
