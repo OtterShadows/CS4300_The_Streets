@@ -15,22 +15,6 @@ USE_LLM = False
 
 
 def json_search(query):
-    # if not query or not query.strip():
-    #     query = "Kardashian"
-    # results = db.session.query(Episode, Review).join(
-    #     Review, Episode.id == Review.id
-    # ).filter(
-    #     Episode.title.ilike(f'%{query}%')
-    # ).all()
-    # matches = []
-    # for episode, review in results:
-    #     matches.append({
-    #         'title': episode.title,
-    #         'descr': episode.descr,
-    #         'imdb_rating': review.imdb_rating
-    #     })
-    # return json.dumps(matches)
-
     if not query or not query.strip():
         query = "Luffy"
     print("\033[32m" + "Query: " + query + "\033[0m")
