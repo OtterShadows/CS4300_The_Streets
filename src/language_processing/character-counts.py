@@ -1,6 +1,7 @@
 import pandas as pd
 import spacy
 from collections import Counter
+import csv
 from collections import defaultdict
 
 #first function get counts of characters output to  text file
@@ -15,6 +16,13 @@ def charCount():
             if ent.label_ == "PERSON":
                 character_counts[ent.text] += 1
     return character_counts
+
+def write_char_counts_to_csv(character_counts: Counter, output_path: str):
+    with open(output_path, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["character", "count"])
+        for character, count in character_counts.items():
+            writer.writerow([character, count])
 
 
 #create dictionary of touples (text, list of characters in text, time)
@@ -58,9 +66,15 @@ def write_reverse_postings_to_csv(filename="reverse_postings.csv"):
     df.to_csv(filename, index=False, encoding="utf-8")
 
 # Run it
-#write_reverse_postings_to_csv()
+write_reverse_postings_to_csv()
 #write_counts_to_csv()
 
+
+char_count = charCount()
+print(char_count)
+write_char_counts_to_csv(char_count, "data/character_names.csv")
+
+print(createReversePostings())
 
 
     

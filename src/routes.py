@@ -6,19 +6,13 @@ To enable AI chat, set USE_LLM = True below. See llm_routes.py for LLM specific 
 import json
 from flask import render_template, request
 from models import db, Episode, Review
-import joblib
-from sklearn.metrics.pairwise import cosine_similarity
-
+from language_processing import similarity_calc
 
 # ── AI toggle ──
 USE_LLM = False
 # USE_LLM = True
 # ───────────────
 
-data = joblib.load("data/model.pkl")
-tfidf_matrix = data["matrix"]
-vectorizer = data["vectorizer"]
-characters = data["characters"]
 
 def query_character(query):
     query_vec = vectorizer.transform([query])
@@ -60,20 +54,6 @@ def register_routes(app):
     @app.route("/characters")
     def character_search():
         return render_template('character-search.html')
-    
-    @app.route("/search")
-    def search():
-        query = request.args.get("q", "")
-        
-        if not query.strip():
-            return json.dumps({"error": "empty query"})
-        
-        result = query_character(query)
-        
-        print(result)
-        return json.dumps({
-            "character": result
-        })
 
     if USE_LLM:
         from llm_routes import register_chat_route
