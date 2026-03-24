@@ -243,7 +243,17 @@ function performSearch(query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
             }
 
-            const character = mockCharacterData[characterKey];
+            const character = null;
+            fetch(`/csearch?q=${encodeURIComponent(characterKey)}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log(`Received character data for ${characterKey}:`, data);
+                    character = data;
+                })
+                .catch(err => {
+                    console.error(`Failed to fetch character data for ${characterKey}:`, err);
+                    alert('Sorry, something went wrong while fetching character data. Please try again.');
+                });
             console.log(`Displaying results for ${character.name} (${characterKey}) based on query: "${query}"`);
 
             // Show the results container
@@ -307,9 +317,13 @@ function performSearch(query) {
                     chartInstance.destroy();
                 }
 
-                const ratingData = character.ratings_over_time;
+                const ratingData = character.ratings_over_time.map(d => ({
+                    date: new Date(d[0] * 1000), 
+                    rating: d[1],
+                    sentiment: d[2]
+                }));                
                 console.log(`Creating chart for ${character.name} with ${ratingData.length} data points`);
-
+                
                 chartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {

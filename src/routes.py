@@ -20,6 +20,8 @@ tfidf_matrix = data["matrix"]
 vectorizer = data["vectorizer"]
 characters = data["characters"]
 
+character_data = joblib.load("data/character_data.pkl")
+
 def query_character(query):
     query_vec = vectorizer.transform([query])
     sims = cosine_similarity(query_vec, tfidf_matrix).flatten()
@@ -74,6 +76,19 @@ def register_routes(app):
         return json.dumps({
             "character": result
         })
+    @app.route("/csearch")
+    def csearch():
+        query = request.args.get("q", "").lower().strip()
+
+        if not query:
+            return json.dumps({})
+
+        for name in character_data:
+            if query in name.lower():
+                return json.dumps({name: character_data[name]})
+
+    # fallback (nothing found)
+        return json.dumps({})
 
     if USE_LLM:
         from llm_routes import register_chat_route

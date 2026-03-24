@@ -138,10 +138,10 @@ def characters_to_dict(characters):
             "rank": character.rank,
             "total_comments": character.total_comments,
             "sentiment": character.sentiment,
-            "sentiment_score": character.sentiment_score,
+            "currentRating": character.sentiment_score,
             "summary": character.summary,
             #ratings as a list of dicts
-            "ratings_over_time": [{"date": r.date, "rating": r.rating, "sentiment": r.sentiment} for r in character.ratings_over_time],
+            "ratings_over_time": [{"date": r.date.timestamp(), "rating": r.rating, "sentiment": r.sentiment} for r in character.ratings_over_time],
             #comments as a list of dicts
             "comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality} for c in character.comments],
             #retrieved as a list of dicts
