@@ -72,7 +72,6 @@ print("below is the query test")
 print(query_character("Akainu", vectorizer, tfidf_matrix, characters))
 print("enies lobby?")
 print([c for c in get_comments_by_character("akainu") if "him" in c.lower()])
-from datetime import datetime
 
 
 # Helper to match_name
@@ -92,7 +91,7 @@ def edit_distance(source: str, target: str):
             if target[j - 1] == source[i - 1]:
                 substitution = D[i-1, j-1] + 0
             else: 
-                substitution = D[i-1,j-1] + 1
+                substitution = D[i-1,j-1] + 2
             D[i,j] = min(deletion, insertion, substitution)
     return D[len(source), len(target)]
 
@@ -149,7 +148,6 @@ def create_tfidf_matrix(filepath: str):
     return (ids, vectorizer, tfidf_matrix, docs)
     
 
-ids, vectorizer, tfidf_matrix, docs = create_tfidf_matrix("data/piratefolk_comments.csv")
 
 # Function 2: Return k most relevant documents for query
 # 	- Assume "Search for character" checkbox is not checked. Then:
@@ -194,8 +192,8 @@ sid = SentimentIntensityAnalyzer()
 start_of_dataset_timestamp = 1678648020
 end_of_dataset_timestamp = 1741543624
 
-df = pd.read_csv("data/piratefolk_comments.csv")
-comments = df.dropna(subset=["text"]).to_dict("records")
+docs = pd.read_csv("data/piratefolk_comments.csv")
+comments = docs.dropna(subset=["text"]).to_dict("records")
 
 
 
@@ -208,70 +206,27 @@ def get_character_rating(character: str, start_timestap=start_of_dataset_timesta
     # is there a more elegant / involved way than looping through comments?
     scores = []
     for comment in comments:
-        if comment["timestamp"] < start_timestap or comment["timestamp"] > end_timestamp:
-            continue
         comment_text = comment["text"]
         if fuzzy_term_match(character, comment_text, 3):
             score = sid.polarity_scores(comment_text)["compound"] # get compound score for doc
-            score_weighted = score * (comment["score"] + 1)
+            score_weighted = score * comment["score"]
             scores.append(score_weighted)
-    # print(f"Scores for {character} in interval {start_timestap} to {end_timestamp}: {scores}")
-
     if len(scores) == 0:
-        return 0  # neutral if no comments
+        return 0
     else:
         return sum(scores) / len(scores)
 
-# convert raw score to a star rating out of 10
 def to_star_rating(raw_score: float) -> float:
-    if raw_score >= 0:
-        curved_score = (raw_score ** 0.3)
-    else:
-        curved_score = -1 * ((-1 * raw_score) ** 0.3)
-    num_stars = (curved_score + 1) * 5
-    if num_stars < 0:
-        num_stars = 0
-    elif num_stars > 10:
-        num_stars = 10
-    return num_stars
+    return (raw_score + 1) * 5
 
-# for popularity trend graph, splits interval into k parts and get charater rating for each part
-def get_star_rating_over_time(character: str, k: int, start_timestamp=start_of_dataset_timestamp, end_timestamp=end_of_dataset_timestamp):
-    interval = (end_timestamp - start_timestamp) // k
-    scores = {}
-    for i in range(k):
-        sub_interval_start = start_timestamp + i * interval
-        sub_interval_end = end_timestamp if i == k - 1 else sub_interval_start + interval
-        score = get_character_rating(character, start_timestap=sub_interval_start, end_timestamp=sub_interval_end)
-        print(f"\033[95mScore for {character} from {datetime.fromtimestamp(sub_interval_start).strftime('%Y-%m-%d')} to {datetime.fromtimestamp(sub_interval_end).strftime('%Y-%m-%d')}: {score}\033[0m")
-        stars = to_star_rating(score)
-        print(f"\033[95mStar rating for {character} from {datetime.fromtimestamp(sub_interval_start).strftime('%Y-%m-%d')} to {datetime.fromtimestamp(sub_interval_end).strftime('%Y-%m-%d')}: {stars}\033[0m")
-        date_object = datetime.fromtimestamp(sub_interval_start)
-        date_formatted = date_object.strftime("%Y-%m-%d")
-        scores[date_formatted] = stars
-    print(f"\033[34mStar ratings for {character} over time: {scores}\033[0m")
-    return scores
-
-def get_star_rating_average(scores: dict[str, float]) -> float:
-    return sum(scores.values()) / len(scores)
-    
-
-def num_mentions(character: str):
-    count = 0
-    for comment in comments:
-        comment_text = comment["text"]
-        if fuzzy_term_match(character, comment_text, 2):
-            count += 1
-    return count
 
 
 
 # TEST FUNCTIONS --------------------------------------------------------
 def get_character_rating_test():
-    test_names = ["luffy", "zoro", "nami", "kuma", "shanks", "oda", "blackbeard"]
-    test_names += ["usopp", "sanji"]
+    test_names = ["luffy", "luffe", "nami", "kuma", "shanks"]
     for name in test_names:
-        print(f"{name}: {get_star_rating_over_time(name, 4)}")
+        print(f"{name}: {to_star_rating(get_character_rating(name))}")
 
 def retrieve_k_docs_test():
     csv_path = "data/piratefolk_comments.csv"
@@ -283,9 +238,10 @@ def retrieve_k_docs_test():
 
 
 
-
 # second implementation - should compare document similarities to "good" and "bad" word documents
 
 
 
-# get_character_rating_test()
+
+
+#retrieve_k_docs_test()
