@@ -8,7 +8,7 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import joblib
-import datetime
+from datetime import datetime
 
 
 
@@ -256,8 +256,13 @@ def get_star_rating_over_time(character: str, k: int, start_timestamp=start_of_d
 def get_star_rating_average(scores: dict[str, float]) -> float:
     return sum(scores.values()) / len(scores)
     
-    return (raw_score + 1) * 5
-
+def num_mentions(character: str):
+    count = 0
+    for comment in comments:
+        comment_text = comment["text"]
+        if fuzzy_term_match(character, comment_text, 2):
+            count += 1
+    return count
 
 
 # TEST FUNCTIONS --------------------------------------------------------
@@ -273,6 +278,8 @@ def retrieve_k_docs_test():
     rankings = retrieve_k_docs(query, tfidf_matrix, 10, vectorizer, ids, docs)
     for ranking in rankings:
         print(ranking["text"])
+
+
 
 
 
