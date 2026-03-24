@@ -1,6 +1,7 @@
 import pandas as pd
 import spacy
 from collections import Counter
+import csv
 from collections import defaultdict
 
 #first function get counts of characters output to  text file
