@@ -234,7 +234,7 @@ function performSearch(query) {
             console.log(`Best character match: "${characterName}"`);
 
             // Step 2: fetch full character data from backend
-            return fetch(`/episodes?q=${encodeURIComponent("name:" + characterName)}`)
+            return fetch(`/episodes?title=${encodeURIComponent("name:" + characterName)}`)
                 .then(res => res.json())
                 .then(data => {
                     console.log('Received character data from backend:', data);

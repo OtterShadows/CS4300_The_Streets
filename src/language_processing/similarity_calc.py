@@ -8,6 +8,7 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import joblib
+import datetime
 
 
 
@@ -98,6 +99,9 @@ def edit_distance(source: str, target: str):
 
 
 
+
+
+
 # Helper: turn txt file into list[str] with each element representing a line
 def file_to_list_stripped(file_path: str) -> list[str]:
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -147,7 +151,7 @@ def create_tfidf_matrix(filepath: str):
     tfidf_matrix = vectorizer.fit_transform(docs)
     return (ids, vectorizer, tfidf_matrix, docs)
     
-
+ids, vectorizer, tfidf_matrix, docs = create_tfidf_matrix("data/piratefolk_comments.csv")
 
 # Function 2: Return k most relevant documents for query
 # 	- Assume "Search for character" checkbox is not checked. Then:
@@ -162,13 +166,17 @@ def retrieve_k_docs(query, td_matrix, k, vectorizer, ids, docs):
 
     rankings = []
     for i in top_indices:
+        # docs can be either list or DataFrame
+        if isinstance(docs, pd.DataFrame):
+            text = docs.iloc[i]["text"]  # pandas row
+        else:
+            text = docs[i]  # already a list
+
         rankings.append({
             "id": ids[i],
-            "score": similarities[i],
-            "text": docs[i]
+            "score": float(similarities[i]),
+            "text": text
         })
-    
-    return rankings
 
 
 
@@ -217,8 +225,38 @@ def get_character_rating(character: str, start_timestap=start_of_dataset_timesta
         return sum(scores) / len(scores)
 
 def to_star_rating(raw_score: float) -> float:
-    return (raw_score + 1) * 5
+    if raw_score >= 0:
+        curved_score = (raw_score ** 0.3)
+    else:
+        curved_score = -1 * ((-1 * raw_score) ** 0.3)
+    num_stars = (curved_score + 1) * 5
+    if num_stars < 0:
+        num_stars = 0
+    elif num_stars > 10:
+        num_stars = 10
+    return num_stars
 
+# for popularity trend graph, splits interval into k parts and get charater rating for each part
+def get_star_rating_over_time(character: str, k: int, start_timestamp=start_of_dataset_timestamp, end_timestamp=end_of_dataset_timestamp):
+    interval = (end_timestamp - start_timestamp) // k
+    scores = {}
+    for i in range(k):
+        sub_interval_start = start_timestamp + i * interval
+        sub_interval_end = end_timestamp if i == k - 1 else sub_interval_start + interval
+        score = get_character_rating(character, start_timestap=sub_interval_start, end_timestamp=sub_interval_end)
+        print(f"\033[95mScore for {character} from {datetime.fromtimestamp(sub_interval_start).strftime('%Y-%m-%d')} to {datetime.fromtimestamp(sub_interval_end).strftime('%Y-%m-%d')}: {score}\033[0m")
+        stars = to_star_rating(score)
+        print(f"\033[95mStar rating for {character} from {datetime.fromtimestamp(sub_interval_start).strftime('%Y-%m-%d')} to {datetime.fromtimestamp(sub_interval_end).strftime('%Y-%m-%d')}: {stars}\033[0m")
+        date_object = datetime.fromtimestamp(sub_interval_start)
+        date_formatted = date_object.strftime("%Y-%m-%d")
+        scores[date_formatted] = stars
+    print(f"\033[34mStar ratings for {character} over time: {scores}\033[0m")
+    return scores
+
+def get_star_rating_average(scores: dict[str, float]) -> float:
+    return sum(scores.values()) / len(scores)
+    
+    return (raw_score + 1) * 5
 
 
 
