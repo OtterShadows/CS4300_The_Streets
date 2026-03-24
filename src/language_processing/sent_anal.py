@@ -1,10 +1,19 @@
 
 
-#use reverse postings
-#character intitialized to 100
-#make dict date:sentiment
-#get sent of each posting, subtract or add aura at each date. 
-#plot and output to image
+#load sentiment analyis model
+#categorize as positive negative neutral
+#sentiments are an enum of positive, negative, neutral
+from nltk.sentiment import SentimentIntensityAnalyzer
 
-def plot_discussion(characterName):
-    return
+sia = SentimentIntensityAnalyzer()
+
+def get_sentiment(text):
+    score = sia.polarity_scores(text)["compound"]
+    
+    if score > 0.05:
+        return "positive"
+    elif score < -0.05:
+        return "negative"
+    else:
+        return "neutral"
+    
