@@ -226,25 +226,40 @@ function performSearch(query) {
         return;
     }
 
-    let characterKey = null;
-
-    // fetch from Flask backend
+    // Step 1: fetch the best character name from backend
     fetch(`/search?q=${encodeURIComponent(trimmedQuery)}`)
         .then(res => res.json())
         .then(data => {
-            // data.character should be the best match
-            characterKey = data.character ? data.character : 'luffy'; // default
-            console.log(`Best character match: "${characterKey}"`);
+            const characterName = data.character || 'Luffy'; // fallback
+            console.log(`Best character match: "${characterName}"`);
 
-            displayCharacterResults(characterKey, trimmedQuery);
+            // Step 2: fetch full character data from backend
+            return fetch(`/episodes?q=${encodeURIComponent("name:" + characterName)}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('Received character data from backend:', data);
+
+                    // Step 3: pass backend data to displayResultsFromBackend
+                    displayResultsFromBackend(data, trimmedQuery);
+                });
         })
         .catch(err => {
             console.error('Search failed:', err);
-            // fallback default
-            characterKey = 'luffy';
-            displayCharacterResults(characterKey, trimmedQuery);
+
+            // fallback default: call displayResultsFromBackend with minimal default data
+            displayResultsFromBackend({
+                name: 'Luffy',
+                summary: 'Default data',
+                rating: 0,
+                mentions: 0,
+                consensus: 'Neutral',
+                retrieved: [],
+                trend: [],
+                trend_dates: []
+            }, trimmedQuery);
         });
 }
+
      function displayResultsFromBackend(data, query) {
             const resultsContainer = document.getElementById('results-container');
             resultsContainer.style.display = 'block';
