@@ -227,14 +227,14 @@ function performSearch(query) {
     fetch(`/search?q=${encodeURIComponent(trimmedQuery)}`)
         .then(res => res.json())
         .then(data => {
-            const characterName = data.character || 'Luffy'; // fallback
+            const characterName = data.character || 'ERROR'; 
             console.log(`Best character match: "${characterName}"`);
             displayCharacterResults(characterName, trimmedQuery)
            ;
         })
         .catch(err => {
             console.error('Search failed:', err);
-            displayCharacterResults('Luffy', trimmedQuery); // fallback to Luffy
+            displayCharacterResults('ERROR', trimmedQuery); 
         });
 }
 

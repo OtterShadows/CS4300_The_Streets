@@ -67,11 +67,11 @@ def make_pickle():
     
 #make_pickle()
 
-print("below is case sensitive teest")
+"""print("below is case sensitive teest")
 print(get_comments_by_character("Kuro") == get_comments_by_character("kuro"))
 print("below is the query test")
 print(query_character("Akainu", vectorizer, tfidf_matrix, characters))
 print("enies lobby?")
-print([c for c in get_comments_by_character("akainu") if "him" in c.lower()])
+print([c for c in get_comments_by_character("akainu") if "him" in c.lower()])"""
 
 

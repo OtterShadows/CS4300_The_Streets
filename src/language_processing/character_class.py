@@ -120,7 +120,7 @@ def create_character(name):
         rank = "C"
     else:        
         rank = "B"
-    print(f"Character: {name}, Rank: {rank}, Total Comments: {total_comments}, Sentiment: {sentiment}, Sentiment Score: {sentiment_score}")
+    #print(f"Character: {name}, Rank: {rank}, Total Comments: {total_comments}, Sentiment: {sentiment}, Sentiment Score: {sentiment_score}")
     return Character(name, rank, total_comments, sentiment, sentiment_score, summary, ratings_over_time, comment_list, retrieved)
 #create_character("Jika")
 
