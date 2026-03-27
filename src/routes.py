@@ -84,7 +84,7 @@ def register_routes(app):
             return json.dumps({})
         if name in character_data.keys():
             print(f"Exact match found for {name}")
-            # print(json.dumps(character_data[name]))
+            print(json.dumps(character_data[name]))
             return json.dumps(character_data[name])
         print(f"{name} is not a character name")
 

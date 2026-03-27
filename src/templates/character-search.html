@@ -263,7 +263,7 @@
                     const heroRank = document.getElementById('hero-rank');
                     const heroSummary = document.getElementById('hero-summary');
 
-                    if (heroName) heroName.textContent = character.name;
+                    if (heroName) heroName.textContent = characterKey
                     if (heroRank) heroRank.textContent = character.rank;
                     if (heroSummary) heroSummary.textContent = character.summary;
 
@@ -275,10 +275,16 @@
                     if (gridRating) gridRating.textContent = character.currentRating.toFixed(1);
                     if (gridSentiment) gridSentiment.textContent = character.sentiment;
 
-                    const commentsShort = character.totalComments >= 1000
-                        ? (character.totalComments / 1000).toFixed(1) + 'K'
-                        : character.totalComments;
-                    if (gridComments) gridComments.textContent = commentsShort;
+                    const commentsShort = character.total_comments >= 1000
+                        ? (character.total_comments / 1000).toFixed(1) + 'K'
+                        : character.total_comments;
+                        console.log(`Total comments for ${character.name}: ${character.total_comments}`);
+                    if (!character.total_comments){
+                        gridComments.textContent = 'shits scuffed chief';
+                    }
+                    else{
+                        gridComments.textContent = commentsShort
+                    }
 
                     // Update query context (show what was searched)
                     const queryTerm = document.getElementById('query-term');
