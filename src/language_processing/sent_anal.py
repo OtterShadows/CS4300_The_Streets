@@ -3,7 +3,14 @@
 #load sentiment analyis model
 #categorize as positive negative neutral
 #sentiments are an enum of positive, negative, neutral
+import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
+
+# added because of error message from container logs while deploying
+try:
+    nltk.data.find('sentiment/vader_lexicon.zip')
+except LookupError:
+    nltk.download('vader_lexicon')
 
 sia = SentimentIntensityAnalyzer()
 
