@@ -88,8 +88,7 @@
                 <!-- Evidence Section -->
                 <div class="evidence-section">
                     <h3>💬 Community Evidence</h3>
-                    <p class="section-subtitle">What people are saying (<span id="retrieved-count">0</span> top
-                        comments)</p>
+                    <p class="section-subtitle">What people are saying...</p>
                     <div id="retrieved-container" class="evidence-list">
                         <!-- Retrieved comments will be populated here -->
                     </div>
@@ -229,17 +228,17 @@
                 .then(data => {
                     console.log('Full response data:', data);
                     const characterName = data.character || 'ERROR';
+                    const retrievedComments = data.relevant_comments || 'ERROR';
                     console.log(`Best character match: "${characterName}"`);
-                    displayCharacterResults(characterName, trimmedQuery)
-                        ;
+                    displayCharacterResults(characterName, trimmedQuery, retrievedComments);
                 })
                 .catch(err => {
                     console.log(`Error during search for "${characterName}":`, err);
-                    displayCharacterResults('ERROR', trimmedQuery);
+                    displayCharacterResults('ERROR', trimmedQuery, 'ERROR');
                 });
         }
 
-        function displayCharacterResults(characterKey, query) {
+        function displayCharacterResults(characterKey, query, retrievedComments) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
             }
@@ -298,7 +297,7 @@
                     updateChart(character, query);
 
                     // Update retrieved documents
-                    updateRetrieved(character);
+                    updateRetrieved(character, retrievedComments);
 
                     // Scroll to results
                     document.getElementById('results-container').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -408,7 +407,7 @@
             });
         }
 
-        function updateRetrieved(character) {
+        function updateRetrieved(character, retrievedComments) {
             try {
                 const retrievedContainer = document.getElementById('retrieved-container');
                 if (!retrievedContainer) {
@@ -416,10 +415,35 @@
                     return;
                 }
 
-                retrievedContainer.innerHTML = '';
-                console.log(`Clearing retrieved container and adding ${character.retrieved.length} comments`);
+                // 2026-04-05 editing this code to include cosine similarity score
+                // retrievedContainer.innerHTML = '';
+                // console.log(`Clearing retrieved container and adding ${character.retrieved.length} comments`);
 
-                character.retrieved.forEach((comment, index) => {
+                // character.retrieved.forEach((comment, index) => {
+                //     const commentEl = document.createElement('div');
+                //     commentEl.className = `retrieved-comment ${comment.sentiment}`;
+                //     commentEl.innerHTML = `
+                //         <div class="retrieved-header">
+                //             <span class="retrieved-user">@${comment.user}</span>
+                //             <span class="retrieved-meta">${comment.timestamp}</span>
+                //         </div>
+                //         <p class="retrieved-text">${comment.text}</p>
+                //         <div class="retrieved-footer">
+                //             <span class="relevance-score">Relevance: ${(comment.score * 100).toFixed(0)}%</span>
+                //             <span class="controversy-level">Controversy: ${(comment.controversiality * 100).toFixed(0)}%</span>
+                //         </div>
+                //     `;
+                //     retrievedContainer.appendChild(commentEl);
+                //     console.log(`Added comment ${index + 1}: ${comment.user}`);
+                // });
+
+                // console.log(`Successfully added all ${character.retrieved.length} comments for ${character.name}`);
+
+
+                retrievedContainer.innerHTML = '';
+                console.log(`Clearing retrieved container and adding ${retrievedComments.length} comments`);
+
+                retrievedComments.forEach((comment, index) => {
                     const commentEl = document.createElement('div');
                     commentEl.className = `retrieved-comment ${comment.sentiment}`;
                     commentEl.innerHTML = `
@@ -429,7 +453,7 @@
                         </div>
                         <p class="retrieved-text">${comment.text}</p>
                         <div class="retrieved-footer">
-                            <span class="relevance-score">Relevance: ${(comment.score * 100).toFixed(0)}%</span>
+                            <span class="relevance-score">Similarity: ${(comment.sim_score * 100).toFixed(0)}%</span>
                             <span class="controversy-level">Controversy: ${(comment.controversiality * 100).toFixed(0)}%</span>
                         </div>
                     `;
@@ -438,6 +462,8 @@
                 });
 
                 console.log(`Successfully added all ${character.retrieved.length} comments for ${character.name}`);
+
+
             } catch (error) {
                 console.error('Error updating retrieved comments:', error);
             }

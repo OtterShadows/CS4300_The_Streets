@@ -12,10 +12,6 @@ from rapidfuzz.distance import Levenshtein # REMIDNER TO ADD RAPIDFUZZ TO PIPINS
 
 
 
-#JW function for returning keyword for a given query. multiword
-# queries will be treated as a vecotr to compare against character name vecotrs.
-# rp = pd.read_csv("src/language_processing/csv/reverse_postings_alias_exact.csv")
-# pfc = pd.read_csv("data/piratefolk_comments.csv") # comments with ids and text
 
 # try referencing csv files by joining path names
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where similarity_calc.py lives
@@ -317,12 +313,35 @@ name_variants = {
     "Koza": ["Kohza"],
 }
 
+# input: dict mapping official name to list of aliases
+# output: dict mapping official name to list of alises including official name
+# context: one-time helper to make life easier for query_character
+def make_name_variants_inclusive(name_variants):
+    result = {}
+    for official, alias_list in name_variants.items():
+        inclusive_list = alias_list.copy()
+        inclusive_list.insert(0, official)
+        result[official] = inclusive_list
+    return result
+
+name_variants_inclusive = make_name_variants_inclusive(name_variants) 
+
+# convert inclusive name_variants to list of aliases
+# flatten list - credit to stackoverflow
+list_all_aliases_nested = list(name_variants_inclusive.values())
+list_all_aliases = [
+    alias
+    for nested_list in list_all_aliases_nested
+    for alias in nested_list
+]
+
 
 
 # !!! function copied from character_counts.py
 # fuzzy match query against all character names and aliases, return canonical name
 # intending to be used in routes.py
-def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], threshold=100) -> str:
+# currently ununsed. not sure if we'll ever use this function.
+def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], threshold=1) -> str:
     best_match = None
     best_distance = float('inf')
     query_lower = query.lower()
@@ -338,6 +357,20 @@ def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], 
     if best_distance <= threshold:
         return best_match
     return ""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -383,6 +416,10 @@ def create_character_tfidf(character_docs: dict[str, str]):
 character_docs = build_character_docs()
 characters, vectorizer, tfidf_matrix = create_character_tfidf(character_docs)
 
+
+
+
+
 # input:
 #       - query string
 #       - tfidf vectorizer
@@ -394,9 +431,11 @@ def query_character(query: str, vectorizer: TfidfVectorizer, tfidf_matrix, chara
     query_vec = vectorizer.transform([query])
     sims = cosine_similarity(query_vec, tfidf_matrix).flatten()
     best_index = sims.argmax()
-    if query in characters:
+
+    query = query.lower()
+    alias_list_lower = [alias.lower() for alias in list_all_aliases]
+    if query in alias_list_lower:
         return query
-        # TODO: should check for aliases too. also, case sensitivity?
     else:
         return characters[best_index]
     # TODO: code doesn't use top_k yet
@@ -409,6 +448,67 @@ def make_pickle():
 }, "data/model.pkl")
     
 # make_pickle()
+
+
+
+
+
+
+# 2026-04-05 ADDING FUNCTIONS FROM A PREVIOUS PROTOYPE
+# in order to retrieve comments actually relevant to the query
+# rather than comments similar to character
+
+
+# helper for retrieve_k_sim_comments
+# given a csv of comment data, create a tf-idf matrix with
+#       rows: comments
+#       cols: terms
+def create_comment_term_tfidf_matrix(filepath: str):
+    df = pd.read_csv(filepath)
+
+    df["text"] = df["text"].fillna("").astype(str)
+
+    texts = df["text"].tolist() # list of comment "bodies"
+    ids = df["id"].tolist() # list of comment ids
+
+    comment_term_vectorizer = TfidfVectorizer()
+    comment_term_tfidf_matrix = comment_term_vectorizer.fit_transform(texts)
+    return (ids, comment_term_vectorizer, comment_term_tfidf_matrix, texts)
+
+
+
+# return k most relevant documents for query
+# 	- input example: "Most useless character in Whole Cake arc"
+# 	- output: Ranked comments based off decreasing cosine similarity
+#               list of dicts, each representing a comment
+def retrieve_k_sim_comments(query, vectorizer, comment_term_tfidf_matrix, ids, texts, k):
+    query_vec = vectorizer.transform([query])
+    similarities = cosine_similarity(query_vec, comment_term_tfidf_matrix).flatten()
+        # list of cosine similarities for each comment
+
+    # get just top k indeces
+    top_indices = similarities.argsort()[::-1][:k]
+
+    rankings = []
+    for i in top_indices:
+        rankings.append((ids[i], similarities[i]))
+    
+    return rankings
+
+
+
+# Code below is for creating the comment_term_tfidf_matrix, to be used for retrieving relevant comments
+print("\033[92m Start create_comment_term_tfidf_matrix \033[0m")
+(comment_ids, comment_term_vectorizer, comment_term_tfidf_matrix, texts) = \
+create_comment_term_tfidf_matrix(pfc_path)
+print("\033[92m End create_comment_term_tfidf_matrix \033[0m")
+
+
+
+
+
+
+
 
 
 
