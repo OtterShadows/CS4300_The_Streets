@@ -15,10 +15,10 @@ from rapidfuzz.distance import Levenshtein
 
 # try referencing csv files by joining path names
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where similarity_calc.py lives
-rp_path = os.path.join(current_dir, "csv", "reverse_postings_alias_exact.csv") # get inverted index info
+rp_path = os.path.join(current_dir, "csv", "new_reverse_postings.csv") # get inverted index info
 rp = pd.read_csv(rp_path)
 
-pfc_path = os.path.join(current_dir, "data", "piratefolk_comments.csv")
+pfc_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
 pfc = pd.read_csv(pfc_path) # comments with ids, texts, and other fields
     # ohhh it's short for pirate folk comments
 
@@ -445,7 +445,7 @@ def make_pickle():
     "matrix": tfidf_matrix,
     "vectorizer": vectorizer,
     "characters": characters
-}, "data/model.pkl")
+}, "src/language_processing/data/model.pkl")
     
 # make_pickle()
 
