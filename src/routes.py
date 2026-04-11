@@ -199,7 +199,7 @@ def register_routes(app):
             k = 1000
         ) # should return list of tuples of form (id, sim_score)
 
-        relevant_comments_containing_character = similarity_calc.filter_comments_for_character(result, relevant_comments)
+        relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
 
         comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
         for (id, score) in relevant_comments_containing_character:

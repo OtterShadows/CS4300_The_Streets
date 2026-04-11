@@ -524,6 +524,21 @@ def filter_comments_for_character(official_name, comment_ids):
     
 
 
+# context: still want to show other comments, but at top of list show comments that reference character
+# input:
+#       - offficial character name
+#       - comments: list of comments, each a tuple of (comment_id, sim_score)
+# output:
+#       - list of comment tuples of same form above
+#           - comments mentioning character are placed first
+def prioritize_comments_by_character(official_name, comment_ids):
+    filtered_comments = filter_comments_for_character(official_name, comment_ids)
+    for pair in comment_ids:
+        if pair not in filtered_comments:
+            filtered_comments.append(pair)
+    return filtered_comments
+
+
         
 
 
