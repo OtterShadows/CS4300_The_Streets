@@ -180,8 +180,8 @@ body {
 }
 
 .artwork-placeholder {
-    width: 280px;
-    height: 320px;
+    width: 380px;
+    height: 480px;
     background: linear-gradient(135deg, rgba(26, 115, 232, 0.15) 0%, rgba(234, 67, 53, 0.1) 100%);
     border-radius: 12px;
     display: flex;
@@ -189,6 +189,8 @@ body {
     justify-content: center;
     position: relative;
     font-size: 120px;
+    background-size: cover;
+    background-position: center;
 }
 
 .rank-badge {

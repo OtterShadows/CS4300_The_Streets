@@ -9,14 +9,14 @@ current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where charact
 
 # comments is a csv with columns id, timestamp, score, controversiality, text
 # comments_df = pd.read_csv("data/piratefolk_comments.csv")
-comments_df_path = os.path.join(current_dir, "data", "piratefolk_comments.csv")
+comments_df_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
 comments_df = pd.read_csv(comments_df_path) 
 comments_df = comments_df.set_index("id")
 
 # postings is a csv with columns character, comment_ids (comma separated)
 
 # postings_df_path = pd.read_csv("src/language_processing/csv/reverse_postings_alias_exact.csv")
-postings_df_path = os.path.join(current_dir, "csv", "reverse_postings_alias_exact.csv")
+postings_df_path = os.path.join(current_dir, "csv", "new_reverse_postings.csv")
 postings_df = pd.read_csv(postings_df_path)
 postings_df = postings_df.drop_duplicates(subset="character")
 postings_df = postings_df.set_index("character")
@@ -74,7 +74,7 @@ def get_rating_over_time(charName):
         ids = ids.iloc[0]
     comments = ids.split(",")
     #make list of comment objects using get_comment function then sort by timestamp
-    comments = sorted([get_comment(comment_id) for comment_id in comments], key=lambda x: x.timestamp)
+    comments = sorted([create_comment(comment_id, None) for comment_id in comments], key=lambda x: x.timestamp)
     ratings_over_time = []
     init_score = 100
     for comment in comments:
@@ -116,11 +116,10 @@ class Character:
 def create_character(name):    
     comments = postings_df.loc[name, "comment_ids"].split(",")
         # list of comment ids mentioning [name]
-    # TODO: comments should not be precomputed and stored within the character class
 
     comment_list = []
     for comment in comments:
-        comment_list.append(get_comment(comment))
+        comment_list.append(create_comment(comment, None))
     retrieved = comment_list[:5]
     ratings_over_time = get_rating_over_time(name)
     summary = "This is a summary of the character."
@@ -164,6 +163,6 @@ def characters_to_dict(characters):
     return char_dict
 
 #print(create_all_characters())
-# joblib.dump(characters_to_dict(create_all_characters()), "data/character_data.pkl")
+# joblib.dump(characters_to_dict(create_all_characters()), "src/language_processing/data/character_data.pkl")
 
 

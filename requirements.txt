@@ -14,4 +14,5 @@ numpy
 joblib
 datetime
 rapidfuzz
+requests
 

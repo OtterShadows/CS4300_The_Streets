@@ -10,6 +10,9 @@ from models import db, Episode, Review
 import joblib
 from sklearn.metrics.pairwise import cosine_similarity
 from language_processing import similarity_calc
+# from pathlib import Path
+import requests
+from functools import lru_cache
 from language_processing import character_class
 
 # ── AI toggle ──
@@ -25,6 +28,118 @@ data = joblib.load(model_path)
 tfidf_matrix = data["matrix"]
 vectorizer = data["vectorizer"]
 characters = data["characters"]
+
+# ===== One Piece GraphQL API Setup =====
+ONE_PIECE_API_URL = "https://onepieceql.com/api/graphql"
+_api_cache = {}  # Cache for API data
+
+def fetch_all_characters():
+    """Fetch all One Piece characters from the GraphQL API with pagination"""
+    global _api_cache
+    
+    if _api_cache:  # Use cached data if available
+        return _api_cache
+    
+    try:
+        page = 1
+        limit = 100  # Fetch 100 at a time
+        total_fetched = 0
+        
+        # GraphQL query with pagination
+        query_template = """
+        {{
+          characters(filter: {{ limit: {limit}, page: {page} }}) {{
+            results {{
+              name
+              image
+            }}
+            info {{
+              count
+              pages
+            }}
+          }}
+        }}
+        """
+        
+        while True:
+            query = query_template.format(limit=limit, page=page)
+            response = requests.post(
+                ONE_PIECE_API_URL,
+                json={"query": query},
+                timeout=10
+            )
+            
+            if response.status_code != 200:
+                print(f"⚠ API error on page {page}: {response.status_code}")
+                break
+            
+            data = response.json()
+            if 'errors' in data:
+                print(f"⚠ GraphQL error on page {page}: {data['errors']}")
+                break
+            
+            if 'data' not in data or not data['data']['characters']:
+                break
+            
+            chars_response = data['data']['characters']
+            characters = chars_response.get('results', [])
+            
+            # Add characters to cache
+            for char in characters:
+                name = char.get('name', '').strip()
+                if name:
+                    _api_cache[name] = char
+            
+            total_fetched += len(characters)
+            info = chars_response.get('info', {})
+            total_count = info.get('count', 0)
+            
+            print(f"✓ Loaded {len(characters)} characters from page {page} (Total: {total_fetched}/{total_count})")
+            
+            # Check if we got all characters
+            if total_fetched >= total_count or not characters:
+                break
+            
+            page += 1
+        
+        print(f"✓ Successfully loaded {len(_api_cache)} total characters from One Piece GraphQL API")
+        return _api_cache
+        
+    except Exception as e:
+        print(f"⚠ Failed to fetch from One Piece GraphQL API: {e}")
+    
+    return {}
+
+@lru_cache(maxsize=128)
+def get_character_image(character_name):
+    """
+    Fetch character image from the official One Piece GraphQL API.
+    Supports multiple name formats and falls back to placeholder if not found.
+    """
+    # Fetch API data first (cached after first load)
+    characters = fetch_all_characters()
+    
+    # Try exact match first
+    if character_name in characters:
+        char_data = characters[character_name]
+        if 'image' in char_data and char_data['image']:
+            url = char_data['image']
+            print(f"✓ Found image for {character_name}")
+            return url
+    
+    # Try fuzzy matching for name variations
+    # Remove spaces and dots for comparison
+    query_normalized = character_name.replace(" ", "").replace(".", "").lower()
+    for api_name, char_data in characters.items():
+        if query_normalized == api_name.replace(" ", "").replace(".", "").lower():
+            if 'image' in char_data and char_data['image']:
+                print(f"✓ Found image for {character_name} (matched: {api_name})")
+                return char_data['image']
+    
+    # Fallback to placeholder
+    placeholder = f"https://via.placeholder.com/400x500/0066cc/ffffff?text={character_name.replace(' ', '%20')}"
+    print(f"⚠ No image found for {character_name}, using placeholder")
+    return placeholder
 
 # character_data = joblib.load("data/character_data.pkl")
 character_data_path = os.path.join(current_dir, "language_processing", "data", "character_data.pkl")
@@ -81,11 +196,13 @@ def register_routes(app):
             comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
             ids = similarity_calc.comment_ids,
             texts = similarity_calc.texts,
-            k = 25
+            k = 1000
         ) # should return list of tuples of form (id, sim_score)
 
+        relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
+
         comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
-        for (id, score) in relevant_comments:
+        for (id, score) in relevant_comments_containing_character:
             comment_list.append(character_class.create_comment(id, score))
 
         return json.dumps({
@@ -101,10 +218,22 @@ def register_routes(app):
             return json.dumps({})
         if name in character_data.keys():
             print(f"Exact match found for {name}")
-            return json.dumps(character_data[name])
+            # Get character data and add image URL
+            char_info = character_data[name]
+            
+            # Convert to dict if it's not already
+            if isinstance(char_info, dict):
+                response_data = char_info.copy()
+            else:
+                # If it's an object, convert to dict
+                response_data = vars(char_info) if hasattr(char_info, '__dict__') else {'data': str(char_info)}
+            
+            # Add image URL
+            response_data['image_url'] = get_character_image(name)
+            print(f"Returning character data with image_url: {response_data.get('image_url')}")
+            return json.dumps(response_data, default=str)
         print(f"{name} is not a character name")
-
-    # fallback (nothing found)
+        # fallback (nothing found)
         return json.dumps({})
 
     # if USE_LLM:

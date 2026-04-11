@@ -267,6 +267,14 @@
                     if (heroRank) heroRank.textContent = character.rank;
                     if (heroSummary) heroSummary.textContent = character.summary;
 
+                    // Update character image
+                    const artworkPlaceholder = document.getElementById('artwork-placeholder');
+                    if (artworkPlaceholder && character.image_url) {
+                        artworkPlaceholder.style.backgroundImage = `url('${character.image_url}')`;
+                        artworkPlaceholder.style.backgroundSize = 'cover';
+                        artworkPlaceholder.style.backgroundPosition = 'center';
+                    }
+
                     // Update stats grid
                     const gridRating = document.getElementById('grid-rating');
                     const gridSentiment = document.getElementById('grid-sentiment');
@@ -278,11 +286,11 @@
                     const commentsShort = character.total_comments >= 1000
                         ? (character.total_comments / 1000).toFixed(1) + 'K'
                         : character.total_comments;
-                        console.log(`Total comments for ${character.name}: ${character.total_comments}`);
-                    if (!character.total_comments){
+                    console.log(`Total comments for ${character.name}: ${character.total_comments}`);
+                    if (!character.total_comments) {
                         gridComments.textContent = 'shits scuffed chief';
                     }
-                    else{
+                    else {
                         gridComments.textContent = commentsShort
                     }
 

@@ -301,7 +301,7 @@ names_and_variants = {
 
 #first function get counts of characters output to  text file
 nlp = spacy.load("en_core_web_sm")
-docs = pd.read_csv("data/piratefolk_comments.csv")
+docs = pd.read_csv("src/language_processing/csv/new_pf_comments.csv")
 comments = docs["text"].dropna().tolist()
 
 
@@ -518,28 +518,27 @@ def write_reverse_postings_alias_to_csv(reverse_postings, filename="src/language
 char_to_count = char_count_alias(names_and_variants)
     # maps character name to # mentions (including aliases)
 
-write_char_counts_to_csv(char_to_count, filename="src/language_processing/csv/character_counts_alias.csv")
+write_char_counts_to_csv(char_to_count, "src/language_processing/csv/new_character_counts.csv")
     # writes above dict to csv
 
-aliases_to_csv(names_and_variants, filename="src/language_processing/csv/name_to_aliases.csv")
+# aliases_to_csv(names_and_variants, filename="src/language_processing/csv/name_to_aliases.csv")
     # creates csv mapping character to alias
 
 
 
-reverse_postings_alias = create_reverse_postings_alias()
+reverse_postings_alias = create_reverse_postings_alias(filename="src/language_processing/csv/new_reverse_postings.csv")
     # dict mapping character name to list of comment ids where character (or some alias) is mentioned
 
-write_reverse_postings_alias_to_csv(reverse_postings_alias, filename="src/language_processing/csv/reverse_postings_alias.csv")
+write_reverse_postings_alias_to_csv(reverse_postings_alias, filename="src/language_processing/csv/new_reverse_postings.csv")
     # writes above dict to csv
 
 
 
-alias_to_canonical = create_alias_to_canonical_dict(names_and_variants)
+# alias_to_canonical = create_alias_to_canonical_dict(names_and_variants)
     # dict mapping alias to canonical character name (including mapping canonical name to itself)
 
-alias_to_canonical_dict_to_csv(alias_to_canonical, output_path="src/language_processing/csv/alias_to_canonical.csv")
+# alias_to_canonical_dict_to_csv(alias_to_canonical, output_path="src/language_processing/csv/alias_to_canonical.csv")
     # writes above dict to csv
-
 
 
 

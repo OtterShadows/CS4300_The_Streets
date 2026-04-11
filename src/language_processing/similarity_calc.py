@@ -1,5 +1,5 @@
 # file for similarity calculations and similar helper functions
-import os # TODO: SHOULD WE ADD THIS TO PIPINSTALL REQUIREMENTS?? -derek
+import os
 import numpy as np
 import pandas as pd
 import nltk
@@ -8,17 +8,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import joblib
 from datetime import datetime
-from rapidfuzz.distance import Levenshtein # REMIDNER TO ADD RAPIDFUZZ TO PIPINSTALL REQUIREMENTS
+from rapidfuzz.distance import Levenshtein
 
 
 
 
 # try referencing csv files by joining path names
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where similarity_calc.py lives
-rp_path = os.path.join(current_dir, "csv", "reverse_postings_alias_exact.csv") # get inverted index info
+rp_path = os.path.join(current_dir, "csv", "new_reverse_postings.csv") # get inverted index info
 rp = pd.read_csv(rp_path)
 
-pfc_path = os.path.join(current_dir, "data", "piratefolk_comments.csv")
+pfc_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
 pfc = pd.read_csv(pfc_path) # comments with ids, texts, and other fields
     # ohhh it's short for pirate folk comments
 
@@ -434,7 +434,7 @@ def query_character(query: str, vectorizer: TfidfVectorizer, tfidf_matrix, chara
 
     query = query.lower()
     alias_list_lower = [alias.lower() for alias in list_all_aliases]
-    if query in alias_list_lower:
+    if query in characters:
         return query
     else:
         return characters[best_index]
@@ -445,7 +445,7 @@ def make_pickle():
     "matrix": tfidf_matrix,
     "vectorizer": vectorizer,
     "characters": characters
-}, "data/model.pkl")
+}, "src/language_processing/data/model.pkl")
     
 # make_pickle()
 
@@ -494,6 +494,53 @@ def retrieve_k_sim_comments(query, vectorizer, comment_term_tfidf_matrix, ids, t
         rankings.append((ids[i], similarities[i]))
     
     return rankings
+
+
+
+# return subset of comment ids containing the official character name or some alias
+# context: want documents retrieved to be relevant to the character returned
+# input: 
+#       - official character name
+#       - comments: list of comments, each a tuple of (comment_id, sim_score)
+# output:
+#       - list of comment tuples of same form above (representing comments containing given character)
+def filter_comments_for_character(official_name, comment_ids):
+    # get list of comment ids mentioning character from reverse postings csv
+    row = rp[rp["character"] == official_name]
+    if not row.empty:
+        ids_string = row.iloc[0]["comment_ids"] # comma separated string of ids
+        ids_list = ids_string.split(",")
+    else:
+        ids_list = []
+    print(f"\033[035m Found {len(ids_list)} IDs for {official_name} \033[030m")
+
+    # for each comment, check if it's in reverse postings for the character
+    result = []
+    for (id, sim_score) in comment_ids:
+        if id in ids_list:
+            result.append((id, sim_score))
+    print(f"\033[035m{len(result)} comments containing retrieved character. \033[030m")
+    return result
+    
+
+
+# context: still want to show other comments, but at top of list show comments that reference character
+# input:
+#       - offficial character name
+#       - comments: list of comments, each a tuple of (comment_id, sim_score)
+# output:
+#       - list of comment tuples of same form above
+#           - comments mentioning character are placed first
+def prioritize_comments_by_character(official_name, comment_ids):
+    filtered_comments = filter_comments_for_character(official_name, comment_ids)
+    for pair in comment_ids:
+        if pair not in filtered_comments:
+            filtered_comments.append(pair)
+    return filtered_comments
+
+
+        
+
 
 
 
