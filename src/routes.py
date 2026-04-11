@@ -196,11 +196,13 @@ def register_routes(app):
             comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
             ids = similarity_calc.comment_ids,
             texts = similarity_calc.texts,
-            k = 10
+            k = 1000
         ) # should return list of tuples of form (id, sim_score)
 
+        relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
+
         comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
-        for (id, score) in relevant_comments:
+        for (id, score) in relevant_comments_containing_character:
             comment_list.append(character_class.create_comment(id, score))
 
         return json.dumps({
