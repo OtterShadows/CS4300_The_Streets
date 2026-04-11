@@ -497,6 +497,34 @@ def retrieve_k_sim_comments(query, vectorizer, comment_term_tfidf_matrix, ids, t
 
 
 
+# return subset of comment ids containing the official character name or some alias
+# context: want documents retrieved to be relevant to the character returned
+# input: 
+#       - official character name
+#       - comments: list of comments, each a tuple of (comment_id, sim_score)
+# output:
+#       - list of comment tuples of same form above (representing comments containing given character)
+def filter_comments_for_character(official_name, comment_ids):
+    # get list of comment ids mentioning character from reverse postings csv
+    row = rp[rp["character"] == official_name]
+    if not row.empty:
+        ids_string = row.iloc[0]["comment_ids"] # comma separated string of ids
+        ids_list = ids_string.split(",")
+    else:
+        ids_list = []
+    print(f"\033[035m Found {len(ids_list)} IDs for {official_name} \033[030m")
+
+    # for each comment, check if it's in reverse postings for the character
+    result = []
+    for (id, sim_score) in comment_ids:
+        if id in ids_list:
+            result.append((id, sim_score))
+    print(f"\033[035m{len(result)} comments containing retrieved character. \033[030m")
+    return result
+    
+
+
+        
 
 
 
