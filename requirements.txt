@@ -15,4 +15,4 @@ joblib
 datetime
 rapidfuzz
 requests
-
+scipy

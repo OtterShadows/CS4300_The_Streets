@@ -10,10 +10,12 @@ from models import db, Episode, Review
 import joblib
 from sklearn.metrics.pairwise import cosine_similarity
 from language_processing import similarity_calc
+from language_processing import svd_testing
 # from pathlib import Path
 import requests
 from functools import lru_cache
 from language_processing import character_class
+from sklearn.preprocessing import normalize
 
 # ── AI toggle ──
 USE_LLM = False
@@ -22,12 +24,16 @@ USE_LLM = False
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where routes.py lives
 model_path = os.path.join(current_dir, "language_processing", "data", "model.pkl")
+svd_model_path = os.path.join(current_dir, "language_processing", "data", "svd_model.pkl")
 
 # data = joblib.load("data/model.pkl")
 data = joblib.load(model_path)
 tfidf_matrix = data["matrix"]
 vectorizer = data["vectorizer"]
 characters = data["characters"]
+svd_data = joblib.load(svd_model_path)
+svd_words_compressed = svd_data["svd_words_compressed"]
+svd_docs_compressed = svd_data["svd_docs_compressed"]
 
 # ===== One Piece GraphQL API Setup =====
 ONE_PIECE_API_URL = "https://onepieceql.com/api/graphql"
@@ -150,23 +156,6 @@ def query_character(query):
     query_vec = vectorizer.transform([query])
     sims = cosine_similarity(query_vec, tfidf_matrix).flatten()
     return characters[sims.argmax()]
-# ... not sure what this function was for? anyways, it's outdated since it calls a
-# function that doesn't exist
-# def json_search(query):
-   
-#     # only retrieve top 10 relevant documents
-#     matches = similarity_calc.retrieve_k_docs(query, similarity_calc.tfidf_matrix, 10, similarity_calc.vectorizer, similarity_calc.ids, similarity_calc.docs)
-#     return json.dumps({
-#         "name": "Search Results",
-#         "summary": "",
-#         "retrieved": matches,            
-#         "rating": 0,
-#         "mentions": 0,
-#         "consensus": "",
-#         "trend": [],
-#         "trend_dates": []
-#         })
-
 
 
 def register_routes(app):
@@ -183,10 +172,10 @@ def register_routes(app):
         
         # calculate the similarity of the query with the character "docs" and 
         # return the most similar character
-        result = similarity_calc.query_character(query, 
-            similarity_calc.vectorizer,
-            similarity_calc.tfidf_matrix,
-            similarity_calc.characters)
+        if query in characters:
+            result = query
+        else:
+            result = svd_testing.closest_doc_to_query(query)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
 
         # calculate top k relevant comments

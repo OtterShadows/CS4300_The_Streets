@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import joblib
 from datetime import datetime
 from rapidfuzz.distance import Levenshtein
+from scipy.sparse.linalg import svds
 
 
 
@@ -360,20 +361,6 @@ def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # input: character name
 # output: list of comment ids that mention that character
 def get_comments_by_character(character: str) -> list[str]:
@@ -439,6 +426,10 @@ def query_character(query: str, vectorizer: TfidfVectorizer, tfidf_matrix, chara
     else:
         return characters[best_index]
     # TODO: code doesn't use top_k yet
+
+def svd_query_character(query: str, vectorizer: TfidfVectorizer, tfidf_matrix, characters: list[str], top_k: int = 1):
+    return
+    
 
 def make_pickle():
     joblib.dump({
