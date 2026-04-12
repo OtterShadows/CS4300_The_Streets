@@ -364,24 +364,22 @@ def write_counts_to_csv(filename="character_counts.csv"):
 
 # fuzzy match query against all character names and aliases, return canonical name
 # intending to be used in routes.py
-def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], threshold=100) -> str:
+def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], threshold=0.3) -> str:
     best_match = None
     best_distance = float('inf')
     query_lower = query.lower()
-    
     for char, aliases in names_and_variants.items():
-        all_names = [char] + aliases
-        for name in all_names:
+        for name in [char] + aliases:
             distance = Levenshtein.distance(query_lower, name.lower())
-            if distance < best_distance:
-                best_distance = distance
+            normalized = distance / max(len(query_lower), len(name))
+            if normalized < best_distance:
+                best_distance = normalized
                 best_match = char
-
     if best_distance <= threshold:
         return best_match
     return ""
 
-
+print(fuzzy_match_character("stocks are up", names_and_variants))
 
 # returns true if edit distance is less than or equal to threshold
 def fuzzy_edit_distance(source: str, target: str, threshold: int = 0):
