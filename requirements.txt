@@ -16,3 +16,4 @@ datetime
 rapidfuzz
 requests
 scipy
+matplotlib
