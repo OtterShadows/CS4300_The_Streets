@@ -1,4 +1,5 @@
 from scipy.sparse.linalg import svds
+import os
 import joblib
 import matplotlib
 import numpy as np
@@ -11,7 +12,9 @@ matplotlib.use("Agg")
 #   quick fix for dependency issue
 #   may not be the right move, i don't know the code in this file well -DT
 
-data = joblib.load("src/language_processing/data/model.pkl")
+current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where svd_testing.py lives, language_processing
+rp_path = os.path.join(current_dir, "data", "model.pkl")
+data = joblib.load(rp_path)
 vectorizer = data["vectorizer"]
 
 td_matrix = data["matrix"]
