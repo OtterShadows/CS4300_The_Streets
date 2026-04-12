@@ -16,6 +16,7 @@ import requests
 from functools import lru_cache
 from language_processing import character_class
 from sklearn.preprocessing import normalize
+from language_processing import character_counts
 
 # ── AI toggle ──
 USE_LLM = False
@@ -170,10 +171,11 @@ def register_routes(app):
         if not query.strip():
             return json.dumps({"error": "empty query"})
         
+        #first check if the query matches a character name (with fuzzy matching)
+        if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
+            result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
         # calculate the similarity of the query with the character "docs" and 
         # return the most similar character
-        if query in characters:
-            result = query
         else:
             result = svd_testing.closest_doc_to_query(query)
         print(f"Received search query: '{query}' -> matched character: '{result}'")

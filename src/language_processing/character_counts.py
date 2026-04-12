@@ -300,7 +300,10 @@ names_and_variants = {
 
 
 #first function get counts of characters output to  text file
-nlp = spacy.load("en_core_web_sm")
+load_nlp = False
+nlp = None
+if load_nlp:
+    nlp = spacy.load("en_core_web_sm")
 docs = pd.read_csv("src/language_processing/csv/new_pf_comments.csv")
 comments = docs["text"].dropna().tolist()
 
@@ -356,14 +359,6 @@ def write_counts_to_csv(filename="character_counts.csv"):
     df = df.sort_values(by="count", ascending=False)
 
     df.to_csv(filename, index=False)
-
-
-
-
-
-
-
-
 
 
 
@@ -515,10 +510,10 @@ def write_reverse_postings_alias_to_csv(reverse_postings, filename="src/language
 
 # RUNNING FUNCTIONS --------------------------------------------------------------------------------------------------------
 
-char_to_count = char_count_alias(names_and_variants)
+#char_to_count = char_count_alias(names_and_variants)
     # maps character name to # mentions (including aliases)
 
-write_char_counts_to_csv(char_to_count, "src/language_processing/csv/new_character_counts.csv")
+#write_char_counts_to_csv(char_to_count, "src/language_processing/csv/new_character_counts.csv")
     # writes above dict to csv
 
 # aliases_to_csv(names_and_variants, filename="src/language_processing/csv/name_to_aliases.csv")
@@ -526,10 +521,10 @@ write_char_counts_to_csv(char_to_count, "src/language_processing/csv/new_charact
 
 
 
-reverse_postings_alias = create_reverse_postings_alias(filename="src/language_processing/csv/new_reverse_postings.csv")
+#reverse_postings_alias = create_reverse_postings_alias(filename="src/language_processing/csv/new_reverse_postings.csv")
     # dict mapping character name to list of comment ids where character (or some alias) is mentioned
 
-write_reverse_postings_alias_to_csv(reverse_postings_alias, filename="src/language_processing/csv/new_reverse_postings.csv")
+#write_reverse_postings_alias_to_csv(reverse_postings_alias, filename="src/language_processing/csv/new_reverse_postings.csv")
     # writes above dict to csv
 
 
