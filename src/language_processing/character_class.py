@@ -163,6 +163,6 @@ def characters_to_dict(characters):
     return char_dict
 
 #print(create_all_characters())
-# joblib.dump(characters_to_dict(create_all_characters()), "src/language_processing/data/character_data.pkl")
+joblib.dump(characters_to_dict(create_all_characters()), "src/language_processing/data/character_data.pkl")
 
 
