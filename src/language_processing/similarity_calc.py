@@ -427,8 +427,6 @@ def query_character(query: str, vectorizer: TfidfVectorizer, tfidf_matrix, chara
         return characters[best_index]
     # TODO: code doesn't use top_k yet
 
-def svd_query_character(query: str, vectorizer: TfidfVectorizer, tfidf_matrix, characters: list[str], top_k: int = 1):
-    return
     
 
 def make_pickle():
@@ -438,7 +436,7 @@ def make_pickle():
     "characters": characters
 }, "src/language_processing/data/model.pkl")
     
-# make_pickle()
+#make_pickle()
 
 
 
