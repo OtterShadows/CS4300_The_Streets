@@ -181,14 +181,22 @@ def register_routes(app):
         print(f"Received search query: '{query}' -> matched character: '{result}'")
 
         # calculate top k relevant comments
-        relevant_comments = similarity_calc.retrieve_k_sim_comments(
+        # relevant_comments = similarity_calc.retrieve_k_sim_comments(
+        #     query = query,
+        #     vectorizer = similarity_calc.comment_term_vectorizer,
+        #     comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
+        #     ids = similarity_calc.comment_ids,
+        #     texts = similarity_calc.texts,
+        #     k = 1000
+        # ) # should return list of tuples of form (id, sim_score)
+
+        relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
+            character = result,
             query = query,
-            vectorizer = similarity_calc.comment_term_vectorizer,
-            comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
-            ids = similarity_calc.comment_ids,
-            texts = similarity_calc.texts,
-            k = 1000
-        ) # should return list of tuples of form (id, sim_score)
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
+
 
         relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
 
