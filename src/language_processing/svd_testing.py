@@ -2,13 +2,14 @@ from scipy.sparse.linalg import svds
 import os
 import joblib
 import matplotlib
+matplotlib.use("Agg")
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import normalize
 
 
 # matplotlib.use("TkAgg")
-matplotlib.use("Agg")
+
 #   quick fix for dependency issue
 #   may not be the right move, i don't know the code in this file well -DT
 
@@ -70,7 +71,7 @@ def closest_doc_to_query(query):
     sims = docs_compressed_normed.dot(query_vec)
     asort = np.argsort(-sims)[:k+1]
     return characters[asort[1]]
-print(closest_doc_to_query("potential man"))
+# print(closest_doc_to_query("potential man"))
             
 """for i, proj, sim in closest_docs_to_query(query_vec):
     doc_svd_vec = docs_compressed_normed[i]
