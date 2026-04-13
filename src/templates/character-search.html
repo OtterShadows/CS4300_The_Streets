@@ -11,13 +11,29 @@
     <div class="full-body-container character-search-layout">
         <!-- Header -->
         <div class="search-header">
-            <div class="header-branding">
-                <h1>The Streets</h1>
+            <div class="header-top">
+                <div class="header-branding">
+                    <h1>The Streets</h1>
+                </div>
+                <button id="dark-mode-toggle" class="dark-mode-btn" onclick="toggleDarkMode()"
+                    title="Toggle dark mode">🌙</button>
             </div>
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
                 <input placeholder="Who's the current GOAT? Who fell off? Who's a fraud?" id="character-search-val"
                     onkeyup="handleSearch(event)">
+            </div>
+
+            <!-- Suggested Inputs Section -->
+            <div id="suggestions-container" class="suggestions-container">
+                <p class="suggestions-title">Try these searches:</p>
+                <div class="suggestions-grid">
+                    <button class="suggestion-btn" onclick="searchSuggestion('biggest coward')">biggest coward</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Luffy Katakuri fight')">Luffy Katakuri
+                        fight</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the goat?')">Who's the
+                        goat?</button>
+                </div>
             </div>
         </div>
 
@@ -87,8 +103,17 @@
 
                 <!-- Evidence Section -->
                 <div class="evidence-section">
-                    <h3>💬 Community Evidence</h3>
-                    <p class="section-subtitle">What people are saying...</p>
+                    <div class="evidence-header">
+                        <div>
+                            <h3>💬 Community Evidence</h3>
+                            <p class="section-subtitle">What people are saying...</p>
+                        </div>
+                        <div class="filter-toggle">
+                            <label for="filter-switch">Filter sensitive content</label>
+                            <input type="checkbox" id="filter-switch" onchange="toggleFilter()">
+                            <span class="toggle-label" id="filter-label">OFF</span>
+                        </div>
+                    </div>
                     <div id="retrieved-container" class="evidence-list">
                         <!-- Retrieved comments will be populated here -->
                     </div>
@@ -102,6 +127,41 @@
         let chartInstance = null;
         const characterKeys = ['luffy', 'zoro', 'nami'];
         let currentCharacterIndex = 0;
+        let filterEnabled = false;
+
+        // List of sensitive words to filter
+        const sensitiveWords = [
+            'damn', 'hell', 'crap', 'piss', 'shit', 'ass', 'bastard', 'bitch',
+            'dick', 'cock', 'pussy', 'whore', 'slut', 'fuck', 'fuckin', 'fag',
+            'nigga', 'nigger', 'goddamn', 'ass', 'asshole', 'motherfucker'
+        ];
+
+        // Dark mode functionality
+        function initDarkMode() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                updateDarkModeButton(true);
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateDarkModeButton(isDarkMode);
+        }
+
+        function updateDarkModeButton(isDarkMode) {
+            const btn = document.getElementById('dark-mode-toggle');
+            if (btn) {
+                btn.textContent = isDarkMode ? '☀️' : '🌙';
+            }
+        }
+
+        // Initialize dark mode on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            initDarkMode();
+        });
 
         // Mock data with dataset structure (score, timestamp, controversiality)
         const mockCharacterData = {
@@ -205,14 +265,69 @@
             document.getElementById('character-search-val').focus();
         }
 
+        function censorText(text) {
+            if (!filterEnabled) return text;
+
+            let censored = text;
+            sensitiveWords.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                censored = censored.replace(regex, '*'.repeat(word.length));
+            });
+            return censored;
+        }
+
+        function toggleFilter() {
+            filterEnabled = document.getElementById('filter-switch').checked;
+            const label = document.getElementById('filter-label');
+            label.textContent = filterEnabled ? 'ON' : 'OFF';
+
+            // Re-render comments with new filter state
+            const retrievedContainer = document.getElementById('retrieved-container');
+            if (retrievedContainer && retrievedContainer.children.length > 0) {
+                // Trigger a re-render of the comments
+                const allComments = retrievedContainer.querySelectorAll('.retrieved-comment');
+                allComments.forEach((commentEl, index) => {
+                    const textEl = commentEl.querySelector('.retrieved-text');
+                    if (textEl && textEl.dataset.originalText) {
+                        textEl.textContent = censorText(textEl.dataset.originalText);
+                    }
+                });
+            }
+        }
+
+        function searchSuggestion(query) {
+            const searchInput = document.getElementById('character-search-val');
+            searchInput.value = query;
+            performSearch(query);
+            hideSuggestions();
+        }
+
+        function showSuggestions() {
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            if (suggestionsContainer) {
+                suggestionsContainer.style.display = 'block';
+            }
+        }
+
+        function hideSuggestions() {
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            if (suggestionsContainer) {
+                suggestionsContainer.style.display = 'none';
+            }
+        }
+
         function handleSearch(event) {
             const query = document.getElementById('character-search-val').value.toLowerCase().trim();
 
             // Search only on Enter key
             if (event.key === 'Enter' && query.length > 0) {
                 performSearch(query);
+                hideSuggestions();
             } else if (query.length === 0) {
                 document.getElementById('results-container').style.display = 'none';
+                showSuggestions();
+            } else {
+                hideSuggestions();
             }
         }
 
@@ -423,30 +538,12 @@
                     return;
                 }
 
-                // 2026-04-05 editing this code to include cosine similarity score
-                // retrievedContainer.innerHTML = '';
-                // console.log(`Clearing retrieved container and adding ${character.retrieved.length} comments`);
-
-                // character.retrieved.forEach((comment, index) => {
-                //     const commentEl = document.createElement('div');
-                //     commentEl.className = `retrieved-comment ${comment.sentiment}`;
-                //     commentEl.innerHTML = `
-                //         <div class="retrieved-header">
-                //             <span class="retrieved-user">@${comment.user}</span>
-                //             <span class="retrieved-meta">${comment.timestamp}</span>
-                //         </div>
-                //         <p class="retrieved-text">${comment.text}</p>
-                //         <div class="retrieved-footer">
-                //             <span class="relevance-score">Relevance: ${(comment.score * 100).toFixed(0)}%</span>
-                //             <span class="controversy-level">Controversy: ${(comment.controversiality * 100).toFixed(0)}%</span>
-                //         </div>
-                //     `;
-                //     retrievedContainer.appendChild(commentEl);
-                //     console.log(`Added comment ${index + 1}: ${comment.user}`);
-                // });
-
-                // console.log(`Successfully added all ${character.retrieved.length} comments for ${character.name}`);
-
+                // Reset filter toggle when loading new comments
+                filterEnabled = false;
+                const filterSwitch = document.getElementById('filter-switch');
+                if (filterSwitch) filterSwitch.checked = false;
+                const filterLabel = document.getElementById('filter-label');
+                if (filterLabel) filterLabel.textContent = 'OFF';
 
                 retrievedContainer.innerHTML = '';
                 console.log(`Clearing retrieved container and adding ${retrievedComments.length} comments`);
@@ -454,17 +551,29 @@
                 retrievedComments.forEach((comment, index) => {
                     const commentEl = document.createElement('div');
                     commentEl.className = `retrieved-comment ${comment.sentiment}`;
-                    commentEl.innerHTML = `
-                        <div class="retrieved-header">
-                            <span class="retrieved-user">@${comment.user}</span>
-                            <span class="retrieved-meta">${comment.timestamp}</span>
-                        </div>
-                        <p class="retrieved-text">${comment.text}</p>
-                        <div class="retrieved-footer">
-                            <span class="relevance-score">Similarity: ${(comment.sim_score * 100).toFixed(0)}%</span>
-                            <span class="controversy-level">Controversy: ${(comment.controversiality * 100).toFixed(0)}%</span>
-                        </div>
+                    const displayText = censorText(comment.text);
+
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'retrieved-header';
+                    headerDiv.innerHTML = `
+                        <span class="retrieved-user">@${comment.user}</span>
+                        <span class="retrieved-meta">${comment.timestamp}</span>
                     `;
+
+                    const textP = document.createElement('p');
+                    textP.className = 'retrieved-text';
+                    textP.dataset.originalText = comment.text;
+                    textP.textContent = displayText;
+
+                    const footerDiv = document.createElement('div');
+                    footerDiv.className = 'retrieved-footer';
+                    footerDiv.innerHTML = `
+                        <span class="relevance-score">Relevance: ${(comment.sim_score * 100).toFixed(0)}%</span>
+                    `;
+
+                    commentEl.appendChild(headerDiv);
+                    commentEl.appendChild(textP);
+                    commentEl.appendChild(footerDiv);
                     retrievedContainer.appendChild(commentEl);
                     console.log(`Added comment ${index + 1}: ${comment.user}`);
                 });
