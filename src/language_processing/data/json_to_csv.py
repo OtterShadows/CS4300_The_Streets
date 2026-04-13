@@ -2,6 +2,7 @@ import json
 import os
 import csv
 from pathlib import Path
+import re
 import pandas as pd
 
 
@@ -51,7 +52,7 @@ def json_to_csv2():
                     comment_score = comment.get('score', 0)
                     comment_controversiality = comment.get('controversiality', 0)
 
-                    cleaned_text = comment_text.replace('\n', ' ').replace('\r', ' ').replace('"', '')
+                    cleaned_text = comment_text.replace('\n', ' ').replace('\r', ' ').replace('"', '').strip()
 
                     writer.writerow([comment_id, comment_timestamp, comment_permalink, comment_score, comment_controversiality, comment_author, cleaned_text])
 
