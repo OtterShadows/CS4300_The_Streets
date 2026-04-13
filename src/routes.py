@@ -36,6 +36,7 @@ svd_data = joblib.load(svd_model_path)
 svd_words_compressed = svd_data["svd_words_compressed"]
 svd_docs_compressed = svd_data["svd_docs_compressed"]
 
+comments_df, postings_df = character_class.load_data()
 # ===== One Piece GraphQL API Setup =====
 ONE_PIECE_API_URL = "https://onepieceql.com/api/graphql"
 _api_cache = {}  # Cache for API data
@@ -148,8 +149,26 @@ def get_character_image(character_name):
     print(f"⚠ No image found for {character_name}, using placeholder")
     return placeholder
 
-# character_data = joblib.load("data/character_data.pkl")
+# Auto-generate character_data.pkl if it doesn't exist
 character_data_path = os.path.join(current_dir, "language_processing", "data", "character_data.pkl")
+
+def ensure_character_data_exists():
+    """Generate character_data.pkl if it doesn't exist."""
+    if not os.path.exists(character_data_path):
+        print("🔄 Generating character_data.pkl...")
+        try:
+            characters = character_class.create_all_characters(postings_df, comments_df)
+            char_dict = character_class.characters_to_dict(characters)
+            joblib.dump(char_dict, character_data_path)
+            print(f"✅ Successfully generated character_data.pkl with {len(char_dict)} characters")
+            return char_dict
+        except Exception as e:
+            print(f"❌ Error generating character_data.pkl: {e}")
+            raise
+    return None
+
+# Ensure character data exists before loading
+ensure_character_data_exists()
 character_data = joblib.load(character_data_path)
 
 # calculates similarity between query and character docs, returns best match's name
@@ -196,13 +215,17 @@ def register_routes(app):
             comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
             k = 50
         )
+        print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
 
 
         relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
 
         comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
         for (id, score) in relevant_comments_containing_character:
-            comment_list.append(character_class.create_comment(id, score))
+            c = character_class.create_comment(id, score, comments_df)
+            if c is not None:
+                comment_list.append(c)
+        print(f"DEBUG: Created {len(comment_list)} Comment objects from {len(relevant_comments_containing_character)} prioritized comments")
 
         return json.dumps({
             "character": result, # string of most similar character to query
