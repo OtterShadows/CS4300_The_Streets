@@ -286,11 +286,11 @@
                     const commentsShort = character.total_comments >= 1000
                         ? (character.total_comments / 1000).toFixed(1) + 'K'
                         : character.total_comments;
-                    console.log(`Total comments for ${character.name}: ${character.total_comments}`);
-                    if (!character.total_comments) {
+                        console.log(`Total comments for ${character.name}: ${character.total_comments}`);
+                    if (!character.total_comments){
                         gridComments.textContent = 'shits scuffed chief';
                     }
-                    else {
+                    else{
                         gridComments.textContent = commentsShort
                     }
 
@@ -423,31 +423,6 @@
                     return;
                 }
 
-                // 2026-04-05 editing this code to include cosine similarity score
-                // retrievedContainer.innerHTML = '';
-                // console.log(`Clearing retrieved container and adding ${character.retrieved.length} comments`);
-
-                // character.retrieved.forEach((comment, index) => {
-                //     const commentEl = document.createElement('div');
-                //     commentEl.className = `retrieved-comment ${comment.sentiment}`;
-                //     commentEl.innerHTML = `
-                //         <div class="retrieved-header">
-                //             <span class="retrieved-user">@${comment.user}</span>
-                //             <span class="retrieved-meta">${comment.timestamp}</span>
-                //         </div>
-                //         <p class="retrieved-text">${comment.text}</p>
-                //         <div class="retrieved-footer">
-                //             <span class="relevance-score">Relevance: ${(comment.score * 100).toFixed(0)}%</span>
-                //             <span class="controversy-level">Controversy: ${(comment.controversiality * 100).toFixed(0)}%</span>
-                //         </div>
-                //     `;
-                //     retrievedContainer.appendChild(commentEl);
-                //     console.log(`Added comment ${index + 1}: ${comment.user}`);
-                // });
-
-                // console.log(`Successfully added all ${character.retrieved.length} comments for ${character.name}`);
-
-
                 retrievedContainer.innerHTML = '';
                 console.log(`Clearing retrieved container and adding ${retrievedComments.length} comments`);
 
@@ -469,7 +444,7 @@
                     console.log(`Added comment ${index + 1}: ${comment.user}`);
                 });
 
-                console.log(`Successfully added all ${character.retrieved.length} comments for ${character.name}`);
+                console.log(`Successfully added all ${retrievedComments.length} comments`);
 
 
             } catch (error) {

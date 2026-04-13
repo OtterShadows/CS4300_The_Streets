@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from language_processing import sent_anal
+# import sent_anal
 from datetime import datetime
 import re
 import joblib 
@@ -10,8 +11,10 @@ import joblib
 comment_cache = {}
 # comments is a csv with columns id, timestamp, score, controversiality, text
 # comments_df = pd.read_csv("data/piratefolk_comments.csv")
+current_dir = os.path.dirname(os.path.abspath(__file__))
 comments_df_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
-comments_df = pd.read_csv(comments_df_path) 
+# comments_df = pd.read_csv(comments_df_path) 
+comments_df = pd.read_csv(comments_df_path, dtype={"id": str})
 comments_df = comments_df.set_index("id")
 
 # postings is a csv with columns character, comment_ids (comma separated)
@@ -20,7 +23,7 @@ def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     comments_df = pd.read_csv(
-        os.path.join(current_dir, "data", "piratefolk_comments.csv")
+        os.path.join(current_dir, "data", "piratefolk_comments.csv"), dtype={"id": str}
     ).set_index("id")
 
     def is_valid(text):
@@ -78,8 +81,9 @@ def create_comment(id, sim_score, comments_df):
         row = row.iloc[0]
     text = str(row["text"])
     sentiment = sent_anal.get_sentiment(text)
+    user = str(row.get("author", "Anonymous")) if "author" in row else "Anonymous"
     comment = Comment(
-        user=None,
+        user=user,
         text=text,
         sentiment=sentiment,
         rating=0,
@@ -213,7 +217,7 @@ def characters_to_dict(characters):
         }
     return char_dict
 #print(create_all_characters())
-# comments_df, postings_df = load_data()
-# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), "src/language_processing/src/language_processing/data/character_data.pkl")
+comments_df, postings_df = load_data()
+# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), "data/character_data.pkl")
 
 

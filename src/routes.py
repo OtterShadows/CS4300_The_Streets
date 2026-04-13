@@ -225,9 +225,14 @@ def register_routes(app):
             if c is not None:
                 comment_list.append(c)
 
+        comments_json = [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score} for c in comment_list]
+        print(f"DEBUG: Returning {len(comments_json)} comments for query '{query}' matched to '{result}'")
+        if len(comments_json) > 0:
+            print(f"DEBUG: First comment: user={comments_json[0].get('user')}, text_preview={comments_json[0].get('text')[:50] if comments_json[0].get('text') else 'N/A'}")
+        
         return json.dumps({
             "character": result, # string of most similar character to query
-            "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score} for c in comment_list]
+            "relevant_comments": comments_json
         })
     
     @app.route("/csearch")
