@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from language_processing import sent_anal
+# import sent_anal
 from datetime import datetime
 import re
 import joblib 
@@ -216,8 +217,8 @@ def characters_to_dict(characters):
             "retrieved": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality} for c in character.retrieved]
         }
     return char_dict
-#print(create_all_characters())
+# print(create_all_characters())
 # comments_df, postings_df = load_data()
-# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), "src/language_processing/src/language_processing/data/character_data.pkl")
+# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), "language_processing/data/character_data.pkl")
 
 
