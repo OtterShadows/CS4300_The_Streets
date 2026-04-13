@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from . import sent_anal
+
 from datetime import datetime
 import joblib 
 # from src.language_processing import similarity_calc
@@ -54,9 +55,10 @@ def create_comment(id, sim_score):
     score = float(row['score'])
     timestamp = float(row['timestamp'])
     controversiality = int(row['controversiality'])
+    user = row["author"]
 
     return Comment(
-        user='Pirate_Man23',
+        user= user,
         text=text,
         sentiment=sentiment,
         rating=0,
