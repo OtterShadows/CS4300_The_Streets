@@ -503,14 +503,14 @@ def filter_comments_for_character(official_name, comment_ids):
         ids_list = ids_string.split(",")
     else:
         ids_list = []
-    print(f"\033[035m Found {len(ids_list)} IDs for {official_name} \033[030m")
+    # print(f"\033[035m Found {len(ids_list)} IDs for {official_name} \033[030m")
 
     # for each comment, check if it's in reverse postings for the character
     result = []
     for (id, sim_score) in comment_ids:
         if id in ids_list:
             result.append((id, sim_score))
-    print(f"\033[035m{len(result)} comments containing retrieved character. \033[030m")
+    # print(f"\033[035m{len(result)} comments containing retrieved character. \033[030m")
     return result
     
 
@@ -542,27 +542,6 @@ create_comment_term_tfidf_matrix(pfc_path)
 # print("\033[92m End create_comment_term_tfidf_matrix \033[0m")
 
 
-
-
-# new - calculate the tfidf similarity among only the comments that mention character
-# context: to make the comments retrieved by the system more relevant to the character retrieved
-# look at later: could use the helper above that gets comments for a character
-def new_retrieve_k_sim_comments(character: str, query: str, comment_term_vectorizer, k = 20):
-    # get all comments mentioning character from reverse postings
-    character_comments_row = rp[rp["character"] == character]
-    if character_comments_row.empty:
-        return character, []
-    character_comments_ids = character_comments_row.iloc[0]["comment_ids"].split(",") # list of ids
-    character_texts = pfc[pfc["id"].isin(character_comments_ids)]["text"].tolist() # only comments that mention character
-
-    query_vec = comment_term_vectorizer.transform([query])
-    character_tfidf_matrix = comment_term_vectorizer.transform(character_texts)
-
-    sims = cosine_similarity(query_vec, character_tfidf_matrix).flatten()
-
-    top_indices = sims.argsort()[::-1][:k]
-    top_comments = [character_texts[i] for i in top_indices]
-    return character, top_comments
 
 
 
