@@ -86,7 +86,7 @@ def get_rating_over_time(charName):
         #neutral does not change the score
         rating = init_score
         sentiment = comment.sentiment
-        print(f"Date: {date}, Sentiment: {sentiment}, Rating: {rating}")
+        # print(f"Date: {date}, Sentiment: {sentiment}, Rating: {rating}")
         ratings_over_time.append(Rating(date, rating, sentiment))
     return sorted(ratings_over_time, key=lambda x: x.date)
 #get_rating_over_time("Jika")

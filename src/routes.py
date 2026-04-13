@@ -16,6 +16,7 @@ import requests
 from functools import lru_cache
 from language_processing import character_class
 from sklearn.preprocessing import normalize
+from language_processing import character_counts
 
 # ── AI toggle ──
 USE_LLM = False
@@ -170,23 +171,32 @@ def register_routes(app):
         if not query.strip():
             return json.dumps({"error": "empty query"})
         
+        #first check if the query matches a character name (with fuzzy matching)
+        if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
+            result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
         # calculate the similarity of the query with the character "docs" and 
         # return the most similar character
-        if query in characters:
-            result = query
         else:
             result = svd_testing.closest_doc_to_query(query)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
 
         # calculate top k relevant comments
-        relevant_comments = similarity_calc.retrieve_k_sim_comments(
+        # relevant_comments = similarity_calc.retrieve_k_sim_comments(
+        #     query = query,
+        #     vectorizer = similarity_calc.comment_term_vectorizer,
+        #     comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
+        #     ids = similarity_calc.comment_ids,
+        #     texts = similarity_calc.texts,
+        #     k = 1000
+        # ) # should return list of tuples of form (id, sim_score)
+
+        relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
+            character = result,
             query = query,
-            vectorizer = similarity_calc.comment_term_vectorizer,
-            comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
-            ids = similarity_calc.comment_ids,
-            texts = similarity_calc.texts,
-            k = 1000
-        ) # should return list of tuples of form (id, sim_score)
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
+
 
         relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
 

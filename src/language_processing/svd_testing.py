@@ -1,4 +1,5 @@
 from scipy.sparse.linalg import svds
+import os
 import joblib
 import matplotlib
 import numpy as np
@@ -11,7 +12,9 @@ matplotlib.use("Agg")
 #   quick fix for dependency issue
 #   may not be the right move, i don't know the code in this file well -DT
 
-data = joblib.load("src/language_processing/data/model.pkl")
+current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where svd_testing.py lives, language_processing
+rp_path = os.path.join(current_dir, "data", "model.pkl")
+data = joblib.load(rp_path)
 vectorizer = data["vectorizer"]
 
 td_matrix = data["matrix"]
@@ -67,15 +70,13 @@ def closest_doc_to_query(query):
     sims = docs_compressed_normed.dot(query_vec)
     asort = np.argsort(-sims)[:k+1]
     return characters[asort[1]]
-#print(closest_doc_to_query("potential man"))
+# print(closest_doc_to_query("potential man"))
             
 """for i, proj, sim in closest_docs_to_query(query_vec):
     doc_svd_vec = docs_compressed_normed[i]
     top_dims_indices = np.argsort(np.abs(doc_svd_vec))[::-1][:3]
     top_dims = [int(dim) for dim in top_dims_indices]
     print("({}, {}, {:.4f}, Top dimensions: {}) ".format(i, proj, sim, top_dims))"""
-
-#print(svd_get_top_character("potential man", vectorizer, docs_compressed_normed, words_compressed_normed, characters))
 
 #make_pickle()
 

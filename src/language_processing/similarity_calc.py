@@ -503,14 +503,14 @@ def filter_comments_for_character(official_name, comment_ids):
         ids_list = ids_string.split(",")
     else:
         ids_list = []
-    print(f"\033[035m Found {len(ids_list)} IDs for {official_name} \033[030m")
+    # print(f"\033[035m Found {len(ids_list)} IDs for {official_name} \033[030m")
 
     # for each comment, check if it's in reverse postings for the character
     result = []
     for (id, sim_score) in comment_ids:
         if id in ids_list:
             result.append((id, sim_score))
-    print(f"\033[035m{len(result)} comments containing retrieved character. \033[030m")
+    # print(f"\033[035m{len(result)} comments containing retrieved character. \033[030m")
     return result
     
 
@@ -536,14 +536,41 @@ def prioritize_comments_by_character(official_name, comment_ids):
 
 
 # Code below is for creating the comment_term_tfidf_matrix, to be used for retrieving relevant comments
-print("\033[92m Start create_comment_term_tfidf_matrix \033[0m")
+# print("\033[92m Start create_comment_term_tfidf_matrix \033[0m")
 (comment_ids, comment_term_vectorizer, comment_term_tfidf_matrix, texts) = \
 create_comment_term_tfidf_matrix(pfc_path)
-print("\033[92m End create_comment_term_tfidf_matrix \033[0m")
+# print("\033[92m End create_comment_term_tfidf_matrix \033[0m")
 
 
 
 
+
+
+# new - calculate the tfidf similarity among only the comments that mention character
+# context: to make the comments retrieved by the system more relevant to the character retrieved
+# look at later: could use the helper above that gets comments for a character
+def newer_retrieve_k_sim_comments(character: str, query: str, comment_term_vectorizer, k = 20):
+    # get all comments mentioning character from reverse postings
+    character_comments_row = rp[rp["character"] == character]
+    if character_comments_row.empty:
+        return []
+    character_comments_ids = character_comments_row.iloc[0]["comment_ids"].split(",") # list of ids
+    matched_df = pfc[pfc["id"].isin(character_comments_ids)].copy()
+    if matched_df.empty:
+        return []
+
+    query_vec = comment_term_vectorizer.transform([query])
+    character_tfidf_matrix = comment_term_vectorizer.transform(matched_df["text"])
+
+    sims = cosine_similarity(query_vec, character_tfidf_matrix).flatten()
+
+    matched_df["sim_score"] = sims
+    top_results_df = matched_df.sort_values(by="sim_score", ascending=False).head(k)
+    result_tuples = list(zip(top_results_df["id"], top_results_df["sim_score"]))
+    return result_tuples
+
+
+    
 
 
 
