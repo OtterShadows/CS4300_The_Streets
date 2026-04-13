@@ -10,9 +10,6 @@ import joblib
 comment_cache = {}
 # comments is a csv with columns id, timestamp, score, controversiality, text
 # comments_df = pd.read_csv("data/piratefolk_comments.csv")
-comments_df_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
-comments_df = pd.read_csv(comments_df_path) 
-comments_df = comments_df.set_index("id")
 
 # postings is a csv with columns character, comment_ids (comma separated)
 # postings_df_path = pd.read_csv("src/language_processing/csv/reverse_postings_alias_exact.csv")
@@ -20,7 +17,7 @@ def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     comments_df = pd.read_csv(
-        os.path.join(current_dir, "data", "piratefolk_comments.csv")
+        os.path.join(current_dir, "csv", "new_pf_comments.csv")
     ).set_index("id")
 
     def is_valid(text):
@@ -30,7 +27,7 @@ def load_data():
     comments_df = comments_df[comments_df["text"].apply(is_valid)]
 
     postings_df = pd.read_csv(
-        os.path.join(current_dir, "csv", "reverse_postings_alias_exact.csv")
+        os.path.join(current_dir, "csv", "new_reverse_postings.csv")
     ).drop_duplicates(subset="character").set_index("character")
 
     valid_ids = set(comments_df.index)
@@ -66,16 +63,22 @@ class Comment:
 # new version of get_comment to account for similarity score
 def create_comment(id, sim_score, comments_df):
     if id in comment_cache:
+        print(f"Cache hit for comment ID {id}")
         return comment_cache[id]
     if id not in comments_df.index:
+        print(f"Comment ID {id} not found in comments_df")
         return None
     row = comments_df.loc[id]
     if isinstance(row, pd.DataFrame):
         row = row.iloc[0]
     text = str(row["text"])
     sentiment = sent_anal.get_sentiment(text)
+    try:
+        user = row["author"] if pd.notna(row["author"]) else "Anonymous"
+    except (KeyError, TypeError):
+        user = "Anonymous"
     comment = Comment(
-        user=None,
+        user=user,
         text=text,
         sentiment=sentiment,
         rating=0,

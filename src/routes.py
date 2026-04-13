@@ -215,15 +215,17 @@ def register_routes(app):
             comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
             k = 50
         )
+        print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
 
 
         relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
 
         comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
-        for (id, score) in relevant_comments:
+        for (id, score) in relevant_comments_containing_character:
             c = character_class.create_comment(id, score, comments_df)
             if c is not None:
                 comment_list.append(c)
+        print(f"DEBUG: Created {len(comment_list)} Comment objects from {len(relevant_comments_containing_character)} prioritized comments")
 
         return json.dumps({
             "character": result, # string of most similar character to query
