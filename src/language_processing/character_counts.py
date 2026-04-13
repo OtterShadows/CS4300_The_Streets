@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import numpy as np
 import spacy
 from collections import Counter
@@ -303,7 +304,10 @@ names_and_variants = {
 load_nlp = True
 if load_nlp:
     nlp = spacy.load("en_core_web_sm")
-docs = pd.read_csv("src/language_processing/csv/new_pf_comments.csv")
+
+current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where character_counts.py lives (language_processing)
+comments_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
+docs = pd.read_csv(comments_path)
 comments = docs["text"].dropna().tolist()
 
 
