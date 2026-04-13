@@ -66,7 +66,7 @@
                 <div class="stat-card">
                     <div class="stat-icon">⭐</div>
                     <div class="stat-content">
-                        <div class="stat-label">Rating</div>
+                        <div class="stat-label">Reputation Score</div>
                         <div class="stat-value" id="grid-rating">9.2</div>
                     </div>
                 </div>
@@ -93,8 +93,7 @@
                 <!-- Graph Section -->
                 <div class="graph-section">
                     <h3>📈 Popularity Trend</h3>
-                    <p class="graph-context">Based on community discussion about "<span
-                            id="query-term">character</span>"</p>
+                    <p class="graph-context">This is a chart showing how positively or negatively <span id="chart-character-name">character</span> has been viewed over time in the r/PirateFolk community.</p>
                     <div
                         style="position: relative; height: 300px; width: 100%; background-color: #f5f5f5; border-radius: 4px;">
                         <canvas id="ratingsChart"></canvas>
@@ -106,7 +105,7 @@
                     <div class="evidence-header">
                         <div>
                             <h3>💬 Community Evidence</h3>
-                            <p class="section-subtitle">What people are saying...</p>
+                            <p class="section-subtitle">This is what people have been saying about "<span id="query-topic">character</span>" in r/PirateFolk</p>
                         </div>
                         <div class="filter-toggle">
                             <label for="filter-switch">Filter sensitive content</label>
@@ -128,6 +127,19 @@
         const characterKeys = ['luffy', 'zoro', 'nami'];
         let currentCharacterIndex = 0;
         let filterEnabled = false;
+
+        // Convert unix timestamp to human-readable date (YYYY-MM-DD format)
+        function formatTimestamp(timestamp) {
+            if (typeof timestamp === 'string') {
+                return timestamp;
+            }
+
+            const date = new Date(timestamp * 1000);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
         // List of sensitive words to filter
         const sensitiveWords = [
@@ -411,9 +423,13 @@
 
                     // Update query context (show what was searched)
                     const queryTerm = document.getElementById('query-term');
+                    const queryTopic = document.getElementById('query-topic');
+                    const chartCharacterName = document.getElementById('chart-character-name');
                     const retrievedCount = document.getElementById('retrieved-count');
 
                     if (queryTerm) queryTerm.textContent = query;
+                    if (queryTopic) queryTopic.textContent = query;
+                    if (chartCharacterName) chartCharacterName.textContent = characterKey;
                     if (retrievedCount) retrievedCount.textContent = character.retrieved.length;
 
                     // Update chart
@@ -557,7 +573,7 @@
                     headerDiv.className = 'retrieved-header';
                     headerDiv.innerHTML = `
                         <span class="retrieved-user">@${comment.user}</span>
-                        <span class="retrieved-meta">${comment.timestamp}</span>
+                        <span class="retrieved-meta">${formatTimestamp(comment.timestamp)}</span>
                     `;
 
                     const textP = document.createElement('p');
