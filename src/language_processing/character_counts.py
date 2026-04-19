@@ -133,12 +133,11 @@ names_and_variants = {
     "Ryokugyu": ["Aramaki"],
     "Sengoku": ["Zango"],
     "Garp": [],
-    "Coby": [],
     "Brannew": [],
     "Hannyabal": ["Hannibal", "Hannybal"],
     "Magellan": [],
     "Shiryu": ["Shilliew"],
-    "Imu": ["Im"],
+    "Imu": [],
     "Sterry": ["Stelly"],
     "Wapol": [],
     "Nefertari Cobra": ["Cobra", "Nefeltari Cobra", "Nefeltari Nebra"],
@@ -299,6 +298,9 @@ names_and_variants = {
     "Koza": ["Kohza"],
 }
 
+names_and_variants_short = {
+
+}
 
 #first function get counts of characters output to  text file
 load_nlp = True
@@ -313,20 +315,49 @@ comments = docs["text"].dropna().tolist()
 
 
 
+# input:
+#   - character counts (type: Counter)
+#   - minimum threshold
+# output: list of official names with more than [min_threshold] mentions
+def get_character_counts_short(character_counts, min_threshold):
+    character_counts_short = Counter()
+    for character, count in character_counts.items():
+        if count >= min_threshold:
+            character_counts_short[character] = count
+    return character_counts_short
+
+
+# input:
+#   - names_and_variants
+#   - input path to character counts csv
+#   - mininmum threshold 
+# output:
+#   - dictionary: shortened form of names_and_variants
+def get_names_and_variants_short(names_and_variants, character_counts_input_path, min_threshold):
+    cc = pd.read_csv(character_counts_input_path)
+    names = cc["character"].tolist()
+    counts = cc["count"].tolist()
+    cc_length = len(names) # number of (condensed characters)
+        
+    names_and_variants_short = {}
+    for i in range(cc_length):
+        name = names[i]
+        count = counts[i]
+        if count >= min_threshold:
+            if name in names_and_variants:
+                names_and_variants_short[name] = names_and_variants[name]
+            else:
+                print(f"Name {name} not found in names_and_variants!")
+    return names_and_variants_short
+            
+    
+
+
 
 
 
 
 # FUNCTIONS ---------------------------------------------------------------------------------------
-
-# will deprecate... going with manual list of characters/aliases instead of NER
-def charCount():
-    character_counts = Counter()
-    for doc in nlp.pipe(comments, batch_size=1000):
-        for ent in doc.ents:
-            if ent.label_ == "PERSON":
-                character_counts[ent.text] += 1
-    return character_counts
 
 def write_char_counts_to_csv(character_counts: Counter, output_path: str):
     with open(output_path, mode="w", newline="", encoding="utf-8") as f:
@@ -410,12 +441,16 @@ def aliases_to_csv(names_and_variants: dict[str, list[str]], output_path="src/la
 # input: dict mapping character name to list of aliases
 # output: Counter object mapping character name to count of mentions (including aliases)
 def char_count_alias(names_and_variants: dict[str, list[str]]):
+    loop_counter = 0
     char_counts = Counter()
     for comment in nlp.pipe(comments, batch_size=1000):
         for word in comment.text.split():
             for character, aliases in names_and_variants.items():
                 if word == character or word in aliases:
                     char_counts[character] += 1
+        loop_counter += 1
+        if loop_counter % 100 == 0:
+            print(f"Loop counter: {loop_counter}")
     return char_counts
 
 
@@ -536,18 +571,45 @@ def create_slander_nicknames(characters: list[str]) -> dict[str, list[str]]:
 names_and_variants = create_slander_nicknames(names_and_variants)
 #print(names_and_variants["Roronoa Zoro"])
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 # RUNNING FUNCTIONS --------------------------------------------------------------------------------------------------------
 
-#char_to_count = char_count_alias(names_and_variants)
+# print("Creating character_counts Counter...")
+# character_counts = char_count_alias(names_and_variants)
     # maps character name to # mentions (including aliases)
+# print("Done creating character_counts Counter.")
 
-#write_char_counts_to_csv(char_to_count, "src/language_processing/csv/new_character_counts.csv")
-    # writes above dict to csv
+
+# character_counts_short = get_character_counts_short(character_counts, 25)
+# write_char_counts_to_csv(character_counts_short, "src/language_processing/csv/new_character_counts.csv")
 
 #aliases_to_csv(names_and_variants, output_path="src/language_processing/csv/name_to_aliases.csv")
     # creates csv mapping character to alias
 
 
+
+
+character_counts_input_path = "src/language_processing/csv/new_character_counts.csv"
+names_and_variants_short = get_names_and_variants_short(names_and_variants, character_counts_input_path, 25)
+aliases_to_csv(names_and_variants_short)
+
+
+
+
+
+# ------- FOR CREATING REVERSE POSTINGS CSV ------------------------------
 
 #reverse_postings_alias = create_reverse_postings_alias(filename="src/language_processing/csv/new_reverse_postings.csv")
     # dict mapping character name to list of comment ids where character (or some alias) is mentioned
@@ -557,12 +619,15 @@ names_and_variants = create_slander_nicknames(names_and_variants)
 
 
 
+
+# ------- FOR CREATING ALIAS TO CANONCIAL MAP CSV --------------------------
 #alias_to_canonical = create_alias_to_canonical_dict(names_and_variants)
     # dict mapping alias to canonical character name (including mapping canonical name to itself)
 
 #alias_to_canonical_dict_to_csv(alias_to_canonical, output_path="src/language_processing/csv/alias_to_canonical.csv")
     # writes above dict to csv
 
+#  ------------------------------------------------------------------
 
 
 

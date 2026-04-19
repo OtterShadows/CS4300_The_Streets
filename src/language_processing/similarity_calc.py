@@ -514,6 +514,9 @@ def filter_comments_for_character(official_name, comment_ids):
 
 
 # context: still want to show other comments, but at top of list show comments that reference character
+# TODO: WITH HOW THE PROJECT IS NOW IMPLEMENTED, IT NO LONGER MAKES SENSE
+# TO USE THIS FUNCTION, SINCE ALL COMMENTS RETURNED SHOULD MENTION THE
+# RETRIEVED CHARACTER
 # input:
 #       - offficial character name
 #       - comments: list of comments, each a tuple of (comment_id, sim_score)
