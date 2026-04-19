@@ -73,7 +73,7 @@ Then open `http://localhost:5001` in your browser!
 │       └── chat.html   # Search + AI chat page (USE_LLM = True)
 ├── requirements.txt
 ├── Dockerfile
-└── .env                # API_KEY goes here (not committed)
+└── .env                # SPARK_API_KEY goes here (not committed)
 ```
 
 - **Database**: SQLite with SQLAlchemy ORM
