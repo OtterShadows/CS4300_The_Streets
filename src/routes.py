@@ -19,8 +19,8 @@ from sklearn.preprocessing import normalize
 from language_processing import character_counts
 
 # ── AI toggle ──
-USE_LLM = False
-# USE_LLM = True
+# USE_LLM = False
+USE_LLM = True
 # ───────────────
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where routes.py lives
@@ -182,7 +182,7 @@ def fetch_all_characters():
 
 # Taken from get_character_image, placed here to load upon loading website, not upon search
 # Fetch API data first (cached after first load)
-characters = fetch_all_characters()
+# characters = fetch_all_characters()
 
 @lru_cache(maxsize=128)
 def get_character_image(character_name):
@@ -190,7 +190,7 @@ def get_character_image(character_name):
     Fetch character image from the official One Piece GraphQL API.
     Supports multiple name formats and falls back to placeholder if not found.
     """
-
+    characters = fetch_all_characters()
     
     # Try exact match first
     if character_name in characters:

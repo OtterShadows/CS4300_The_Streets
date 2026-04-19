@@ -23,6 +23,13 @@
                 <input placeholder="Who's the current GOAT? Who fell off? Who's a fraud?" id="character-search-val"
                     onkeyup="handleSearch(event)">
             </div>
+            <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;"
+                <span>Use LLM</span>
+                <label class="switch">
+                    <input type="checkbox" id="llm-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
 
             <!-- Suggested Inputs Section -->
             <div id="suggestions-container" class="suggestions-container">
@@ -353,7 +360,13 @@
                 document.getElementById('results-container').style.display = 'none';
                 return;
             }
-            fetch(`/search?q=${encodeURIComponent(trimmedQuery)}`)
+            const useLLM = document.getElementById('llm-toggle').checked
+            const endpoint = useLLM
+                ? `/chat?q=${encodeURIComponent(trimmedQuery)}`
+                : `/search?q=${encodeURIComponent(trimmedQuery)}`;
+            
+
+            fetch(endpoint)
                 .then(res => res.json())
                 .then(data => {
                     console.log('Full response data:', data);
