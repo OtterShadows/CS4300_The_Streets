@@ -343,6 +343,9 @@
             }
         }
 
+        // Calls search route with raw query, which returns closest matching character along with
+        // their relevant comments.
+        // Then, calls displayCharacterResults with character and comments to display on page.
         function performSearch(query) {
             const trimmedQuery = query.toLowerCase().trim();
             console.log(`performSearch called with query: "${trimmedQuery}"`);
@@ -365,6 +368,10 @@
                 });
         }
 
+        // Calls csearch route with the matched character,
+        // which returns all the character data needed to display on the page (including image_url)
+        // (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved, image_url)
+        // Then, display this data on the page.
         function displayCharacterResults(characterKey, query, retrievedComments) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();

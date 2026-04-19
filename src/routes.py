@@ -19,8 +19,8 @@ from sklearn.preprocessing import normalize
 from language_processing import character_counts
 
 # ── AI toggle ──
-USE_LLM = False
-# USE_LLM = True
+# USE_LLM = False
+USE_LLM = True
 # ───────────────
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where routes.py lives
@@ -40,6 +40,26 @@ comments_df, postings_df = character_class.load_data()
 # ===== One Piece GraphQL API Setup =====
 ONE_PIECE_API_URL = "https://onepieceql.com/api/graphql"
 _api_cache = {}  # Cache for API data
+
+# Copying from flask template for reference
+# input: query
+# output: list of matching episodes (title, descr, imdb_rating) in json format
+def json_search(query):
+    if not query or not query.strip():
+        query = "Kardashian"
+    results = db.session.query(Episode, Review).join(
+        Review, Episode.id == Review.id
+    ).filter(
+        Episode.title.ilike(f'%{query}%')
+    ).all()
+    matches = []
+    for episode, review in results:
+        matches.append({
+            'title': episode.title,
+            'descr': episode.descr,
+            'imdb_rating': review.imdb_rating
+        })
+    return json.dumps(matches)
 
 def fetch_all_characters():
     """Fetch all One Piece characters from the GraphQL API with pagination"""
@@ -169,6 +189,9 @@ def ensure_character_data_exists():
 
 # Ensure character data exists before loading
 ensure_character_data_exists()
+# In json form,
+# A dict mapping each character name to a dict of their data
+# (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved)
 character_data = joblib.load(character_data_path)
 
 # calculates similarity between query and character docs, returns best match's name
@@ -198,16 +221,6 @@ def register_routes(app):
         else:
             result = svd_testing.closest_doc_to_query(query)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
-
-        # calculate top k relevant comments
-        # relevant_comments = similarity_calc.retrieve_k_sim_comments(
-        #     query = query,
-        #     vectorizer = similarity_calc.comment_term_vectorizer,
-        #     comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
-        #     ids = similarity_calc.comment_ids,
-        #     texts = similarity_calc.texts,
-        #     k = 1000
-        # ) # should return list of tuples of form (id, sim_score)
 
         relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
             character = result,
@@ -258,6 +271,6 @@ def register_routes(app):
         # fallback (nothing found)
         return json.dumps({})
 
-    # if USE_LLM:
-    #     from llm_routes import register_chat_route
-    #     # register_chat_route(app, json_search)
+    if USE_LLM:
+        from llm_routes import register_chat_route
+        register_chat_route(app, json_search)
