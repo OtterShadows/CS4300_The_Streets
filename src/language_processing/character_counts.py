@@ -9,6 +9,9 @@ from rapidfuzz.distance import Levenshtein # REMIDNER TO ADD RAPIDFUZZ TO PIPINS
 
 # DATA --------------------------------------------------------------------------------------
 
+
+piratefolk_comments_filename = "piratefolk_comments_(v2).csv"
+
 # dict mapping character name to list of aliases (translations, canon nicknames, etc.)
 # aliases gathered from the one piece wiki
 # does not cover cases of reddit-given nicknames
@@ -305,7 +308,7 @@ if load_nlp:
     nlp = spacy.load("en_core_web_sm")
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where character_counts.py lives (language_processing)
-comments_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
+comments_path = os.path.join(current_dir, "csv", piratefolk_comments_filename)
 docs = pd.read_csv(comments_path)
 comments = docs["text"].dropna().tolist()
 

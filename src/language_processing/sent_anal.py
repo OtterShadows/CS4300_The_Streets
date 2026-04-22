@@ -5,7 +5,7 @@
 #sentiments are an enum of positive, negative, neutral
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
-from . import character_counts
+import character_counts
 
 try:
     nltk.data.find('sentiment/vader_lexicon.zip')

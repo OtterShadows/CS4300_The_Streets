@@ -1,11 +1,14 @@
 import os
 import pandas as pd
-from language_processing import sent_anal
+import sent_anal
 # import sent_anal
 from datetime import datetime
 import re
 import joblib 
 # from src.language_processing import similarity_calc
+
+piratefolk_comments_filename = "piratefolk_comments_(v2).csv"
+reverse_postings_filename = "reverse_postings.csv"
 
 #To speed up multiple calls of the functions.
 comment_cache = {}
@@ -18,7 +21,7 @@ def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     comments_df = pd.read_csv(
-        os.path.join(current_dir, "csv", "new_pf_comments.csv")
+        os.path.join(current_dir, "csv", piratefolk_comments_filename)
     ).set_index("id")
 
     def is_valid(text):
@@ -28,7 +31,7 @@ def load_data():
     comments_df = comments_df[comments_df["text"].apply(is_valid)]
 
     postings_df = pd.read_csv(
-        os.path.join(current_dir, "csv", "new_reverse_postings.csv")
+        os.path.join(current_dir, "csv", reverse_postings_filename)
     ).drop_duplicates(subset="character").set_index("character")
 
     valid_ids = set(comments_df.index)
@@ -218,7 +221,10 @@ def characters_to_dict(characters):
         }
     return char_dict
 # print(create_all_characters())
-# comments_df, postings_df = load_data()
-# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), "language_processing/data/character_data.pkl")
+comments_df, postings_df = load_data()
+current_dir = os.path.dirname(os.path.abspath(__file__))
+character_data_filename = "character_data.pkl"
+character_data_filepath = os.path.join(current_dir, "data", character_data_filename)
+joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), character_data_filepath)
 
 
