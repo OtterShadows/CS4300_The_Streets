@@ -66,10 +66,10 @@ class Comment:
 # new version of get_comment to account for similarity score
 def create_comment(id, sim_score, comments_df):
     if id in comment_cache:
-        print(f"Cache hit for comment ID {id}")
+        # print(f"Cache hit for comment ID {id}")
         return comment_cache[id]
     if id not in comments_df.index:
-        print(f"Comment ID {id} not found in comments_df")
+        # print(f"Comment ID {id} not found in comments_df")
         return None
     row = comments_df.loc[id]
     if isinstance(row, pd.DataFrame):
@@ -167,6 +167,7 @@ def create_character(name, postings_df, comments_df):
     comment_list = [ c for c in
         (create_comment(cid, 0, comments_df) for cid in comment_ids) if c is not None
     ]
+
     ratings_over_time = get_rating_over_time(name, postings_df, comments_df)
     pos = sum(1 for c in comment_list if c.sentiment == "positive")
     neg = sum(1 for c in comment_list if c.sentiment == "negative")
