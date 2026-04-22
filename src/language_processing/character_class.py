@@ -52,7 +52,7 @@ class Rating:
 
 
 class Comment:
-   def __init__(self, user, text, sentiment, rating=None, score=None, timestamp=None, controversiality=None, sim_score=None):
+   def __init__(self, user, text, sentiment, rating=None, score=None, timestamp=None, controversiality=None, sim_score=None, permalink=None):
         self.user = user
         self.text = text
         self.sentiment = sentiment
@@ -62,6 +62,7 @@ class Comment:
         self.timestamp = timestamp
         self.controversiality = controversiality
         self.sim_score = sim_score
+        self.permalink = permalink
 
 
 # new version of get_comment to account for similarity score
@@ -81,6 +82,7 @@ def create_comment(id, sim_score, comments_df):
         user = row["author"] if pd.notna(row["author"]) else "Anonymous"
     except (KeyError, TypeError):
         user = "Anonymous"
+    link = "https://www.reddit.com" + row["permalink"]
     comment = Comment(
         user=user,
         text=text,
@@ -89,7 +91,8 @@ def create_comment(id, sim_score, comments_df):
         score=float(row["score"]),
         sim_score=sim_score,
         timestamp=float(row["timestamp"]),
-        controversiality=int(row["controversiality"])
+        controversiality=int(row["controversiality"]),
+        permalink=link
     )
 
     comment_cache[id] = comment
@@ -216,9 +219,9 @@ def characters_to_dict(characters):
             # "ratings_over_time": [(r.date.timestamp(), r.rating) for r in character.ratings_over_time],
             "ratings_over_time": [{"date": r.date.timestamp(), "rating": r.rating, "sentiment": r.sentiment} for r in character.ratings_over_time],
             #comments as a list of dicts
-            "comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality} for c in character.comments],
+            "comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "permalink": c.permalink} for c in character.comments],
             #retrieved as a list of dicts
-            "retrieved": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality} for c in character.retrieved]
+            "retrieved": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "permalink": c.permalink} for c in character.retrieved]
         }
     return char_dict
 # print(create_all_characters())

@@ -573,6 +573,14 @@
                         <span class="timestamp">${comment.timestamp}</span>
                     </div>
                 `;
+
+                if (comment.hyperlink) {
+                    commentEl.style.cursor = 'pointer';
+                    commentEl.addEventListener('click', () => {
+                        window.open(comment.hyperlink, '_blank')
+                    })
+                }
+                
                 commentContainer.appendChild(commentEl);
             });
         }
