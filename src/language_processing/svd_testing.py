@@ -14,8 +14,8 @@ from sklearn.preprocessing import normalize
 #   may not be the right move, i don't know the code in this file well -DT
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where svd_testing.py lives, language_processing
-rp_path = os.path.join(current_dir, "data", "model.pkl")
-data = joblib.load(rp_path)
+model_path = os.path.join(current_dir, "data", "model.pkl")
+data = joblib.load(model_path)
 vectorizer = data["vectorizer"]
 
 td_matrix = data["matrix"]

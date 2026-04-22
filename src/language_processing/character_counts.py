@@ -680,6 +680,8 @@ aliases_to_csv(names_and_variants_short)
 
 # BANISHED (UNUNSED) FUNCTIONS -------------------------------------------------------------
 
+
+# NEVER MIND THIS ONE IS USED
 # fuzzy match query against all character names and aliases, return canonical name
 # intending to be used in routes.py
 def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], threshold=0.3) -> str:
