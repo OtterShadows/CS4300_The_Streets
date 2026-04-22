@@ -66,7 +66,7 @@ def template_json_search(query):
 # to mimic template's control flow going forward with the LLM integration
 # Input: query (string)
 # Output: json with character name, and relevant comments (list of dicts with user, sim_score, etc.)
-def json_search(query):
+def json_search(query, use_svd):
     if not query.strip():
         return json.dumps({"error": "empty query"})
         
@@ -81,19 +81,26 @@ def json_search(query):
         result = svd_testing.closest_doc_to_query(query)
     print(f"Received search query: '{query}' -> matched character: '{result}'")
 
-    relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
-        character = result,
-        query = query,
-        comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
-        k = 50
-    )
+    
+    if use_svd:
+        print("Using SVD for comment retrieval")
+        relevant_comments = svd_testing.svd_retrieve_k_sim_comments(
+            character = result,
+            query = query,
+            tfidf_matrix = tfidf_matrix,
+            k = 30
+        )
+    else:
+        print("Using original similarity_calc for comment retrieval")
+        relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
+            character = result,
+            query = query,
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
+    
 
-    relevant_comments = svd_testing.svd_retrieve_k_sim_comments(
-        character = result,
-        query = query,
-        tfidf_matrix = tfidf_matrix,
-        k = 30
-    )
+    
 
     print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
 
@@ -264,7 +271,8 @@ def register_routes(app):
     @app.route("/search")
     def search():
         query = request.args.get("q", "")
-        character_and_comments_json = json_search(query) # get character name and relevant comments from query
+        use_svd = request.args.get("use_svd", "false").lower() == "true"
+        character_and_comments_json = json_search(query, use_svd) # get character name and relevant comments from query
         return character_and_comments_json
     
     @app.route("/csearch")

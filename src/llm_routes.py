@@ -86,6 +86,9 @@ def llm_modify_query(client, user_message):
         },
         {"role": "user", "content": user_message},
     ]
+    # TODO:
+    #   1. Have not implemented handling of YES/NO whether a character should be returned
+    #   2. Right now, too many synonyms are generated, seems to actually be messing results up a little bit.
     print("Calculating LLM response for query modification...")
     response = client.chat(messages)
     print("Finished calculating LLM response for query modification...")
@@ -121,7 +124,8 @@ def register_chat_route(app, json_search):
         print(f"Return character?: {return_character}")
         print(f"Modified query: {modified_query}\n")
         # return_character: TRUE if a character should be displayed for the results 
-        character_and_comments_json = json.loads(json_search(modified_query))
+        use_svd = request.args.get("use_svd", "false").lower() == "true"
+        character_and_comments_json = json.loads(json_search(modified_query, use_svd))
         return character_and_comments_json
 
         # TODO: Code below is from the template. For generating a natural language answer for the user, I believe.

@@ -23,12 +23,21 @@
                 <input placeholder="Who's the current GOAT? Who fell off? Who's a fraud?" id="character-search-val"
                     onkeyup="handleSearch(event)">
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;"
-                <span>Use LLM</span>
-                <label class="switch">
-                    <input type="checkbox" id="llm-toggle">
-                    <span class="slider round"></span>
-                </label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>Use LLM for query modification</span>
+                    <label class="switch">
+                        <input type="checkbox" id="llm-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>Use SVD for comment retrieval</span>
+                    <label class="switch">
+                        <input type="checkbox" id="svd-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
             </div>
 
             <!-- Suggested Inputs Section -->
@@ -361,10 +370,12 @@
                 return;
             }
             const useLLM = document.getElementById('llm-toggle').checked
-            const endpoint = useLLM
+            const useSVD = document.getElementById('svd-toggle').checked
+            let endpoint = useLLM
                 ? `/chat?q=${encodeURIComponent(trimmedQuery)}`
                 : `/search?q=${encodeURIComponent(trimmedQuery)}`;
-            
+            endpoint += `&use_svd=${useSVD}`;
+            // pass useSVD as arg to route
 
             fetch(endpoint)
                 .then(res => res.json())
