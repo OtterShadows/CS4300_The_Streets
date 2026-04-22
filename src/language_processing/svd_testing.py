@@ -17,7 +17,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where svd_tes
 model_path = os.path.join(current_dir, "data", "model.pkl")
 data = joblib.load(model_path)
 vectorizer = data["vectorizer"]
-
 td_matrix = data["matrix"]
 characters =data["characters"]
 #u, s, v_trans = svds(td_matrix, k=100)
@@ -38,17 +37,6 @@ words_compressed = words_compressed.transpose()
 word_to_index = vectorizer.vocabulary_       
 index_to_word = {i:t for t,i in word_to_index.items()}
 words_compressed_normed = normalize(words_compressed, axis = 1)
-
-def closest_words(word_in, words_representation_in, k = 10):
-    if word_in not in word_to_index: return "Not in vocab."
-    sims = words_representation_in.dot(words_representation_in[word_to_index[word_in],:])
-    asort = np.argsort(-sims)[:k+1]
-    return [(index_to_word[i],sims[i]) for i in asort[1:]]
-
-query =" potential man"
-query_tfidf = vectorizer.transform([query]).toarray()
-query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
-
 docs_compressed_normed = normalize(docs_compressed)
 
 def make_pickle():
@@ -79,6 +67,24 @@ def closest_doc_to_query(query):
     top_dims = [int(dim) for dim in top_dims_indices]
     print("({}, {}, {:.4f}, Top dimensions: {}) ".format(i, proj, sim, top_dims))"""
 
-#make_pickle()
+make_pickle()
 
     
+
+
+
+
+# UNUSED? -------------------------------------------------------------------------------
+def closest_words(word_in, words_representation_in, k = 10):
+    if word_in not in word_to_index: return "Not in vocab."
+    sims = words_representation_in.dot(words_representation_in[word_to_index[word_in],:])
+    asort = np.argsort(-sims)[:k+1]
+    return [(index_to_word[i],sims[i]) for i in asort[1:]]
+
+    
+
+# TEST -----------------------------------------------------------------------------------
+
+# query =" potential man"
+# query_tfidf = vectorizer.transform([query]).toarray()
+# query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
