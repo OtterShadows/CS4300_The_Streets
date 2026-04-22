@@ -1,7 +1,6 @@
 import os
 import pandas as pd
-import sent_anal
-# import sent_anal
+from language_processing import sent_anal
 from datetime import datetime
 import re
 import joblib 
@@ -225,6 +224,6 @@ comments_df, postings_df = load_data()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 character_data_filename = "character_data.pkl"
 character_data_filepath = os.path.join(current_dir, "data", character_data_filename)
-joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), character_data_filepath)
+# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), character_data_filepath)
 
 

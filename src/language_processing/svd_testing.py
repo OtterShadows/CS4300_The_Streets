@@ -67,7 +67,7 @@ def closest_doc_to_query(query):
     top_dims = [int(dim) for dim in top_dims_indices]
     print("({}, {}, {:.4f}, Top dimensions: {}) ".format(i, proj, sim, top_dims))"""
 
-make_pickle()
+# make_pickle()
 
     
 
@@ -81,7 +81,7 @@ def closest_words(word_in, words_representation_in, k = 10):
     asort = np.argsort(-sims)[:k+1]
     return [(index_to_word[i],sims[i]) for i in asort[1:]]
 
-    
+
 
 # TEST -----------------------------------------------------------------------------------
 

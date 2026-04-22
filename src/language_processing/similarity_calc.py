@@ -439,7 +439,7 @@ def make_pickle():
     "characters": characters
 }, model_path)
     
-make_pickle()
+# make_pickle()
 
 
 
@@ -541,8 +541,8 @@ def prioritize_comments_by_character(official_name, comment_ids):
 
 # Code below is for creating the comment_term_tfidf_matrix, to be used for retrieving relevant comments
 # print("\033[92m Start create_comment_term_tfidf_matrix \033[0m")
-# (comment_ids, comment_term_vectorizer, comment_term_tfidf_matrix, texts) = \
-# create_comment_term_tfidf_matrix(pfc_path)
+(comment_ids, comment_term_vectorizer, comment_term_tfidf_matrix, texts) = \
+    create_comment_term_tfidf_matrix(pfc_path)
 # print("\033[92m End create_comment_term_tfidf_matrix \033[0m")
 
 
