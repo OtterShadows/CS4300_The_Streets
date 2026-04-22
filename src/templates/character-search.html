@@ -797,9 +797,28 @@
                 if (filterLabel) filterLabel.textContent = 'OFF';
 
                 retrievedContainer.innerHTML = '';
-                console.log(`Clearing retrieved container and adding ${retrievedComments.length} comments`);
 
-                retrievedComments.forEach((comment, index) => {
+                // Filter out comments with 0 relevance, sort by relevance (highest first) and recency (most recent first), then take top 10
+                const relevantComments = retrievedComments
+                    .filter(comment => comment.sim_score > 0)
+                    .sort((a, b) => {
+                        // Primary sort: by relevance (descending)
+                        if (b.sim_score !== a.sim_score) {
+                            return b.sim_score - a.sim_score;
+                        }
+                        // Secondary sort: by timestamp (descending - most recent first)
+                        return (b.timestamp || 0) - (a.timestamp || 0);
+                    })
+                    .slice(0, 10);
+
+                console.log(`Filtering comments: ${retrievedComments.length} total → ${retrievedComments.filter(c => c.sim_score > 0).length} relevant → Top 10 by relevance & recency`);
+
+                if (relevantComments.length === 0) {
+                    retrievedContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No relevant comments found for this query.</p>';
+                    return;
+                }
+
+                relevantComments.forEach((comment, index) => {
                     const commentEl = document.createElement('div');
                     commentEl.className = `retrieved-comment ${comment.sentiment}`;
                     const displayText = censorText(comment.text);
@@ -826,10 +845,10 @@
                     commentEl.appendChild(textP);
                     commentEl.appendChild(footerDiv);
                     retrievedContainer.appendChild(commentEl);
-                    console.log(`Added comment ${index + 1}: ${comment.user}`);
+                    console.log(`#${index + 1} - ${comment.user} (relevance: ${(comment.sim_score * 100).toFixed(0)}%)`);
                 });
 
-                console.log(`Successfully added all ${character.retrieved.length} comments for ${character.name}`);
+                console.log(`Successfully added ${relevantComments.length} relevant comments for ${character.name}`);
 
 
             } catch (error) {
