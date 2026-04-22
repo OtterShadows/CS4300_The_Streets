@@ -196,7 +196,7 @@ def register_routes(app):
         # calculate the similarity of the query with the character "docs" and 
         # return the most similar character
         else:
-            result = svd_testing.closest_doc_to_query(query)
+            result = svd_testing.closest_doc_to_query(query)[0]
         print(f"Received search query: '{query}' -> matched character: '{result}'")
 
         # calculate top k relevant comments
