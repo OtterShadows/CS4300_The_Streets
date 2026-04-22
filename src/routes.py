@@ -19,8 +19,8 @@ from sklearn.preprocessing import normalize
 from language_processing import character_counts
 
 # ── AI toggle ──
-USE_LLM = False
-# USE_LLM = True
+#USE_LLM = False
+USE_LLM = True
 # ───────────────
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where routes.py lives
@@ -258,6 +258,6 @@ def register_routes(app):
         # fallback (nothing found)
         return json.dumps({})
 
-    # if USE_LLM:
-    #     from llm_routes import register_chat_route
-    #     # register_chat_route(app, json_search)
+    if USE_LLM:
+        from llm_routes import register_chat_route
+        register_chat_route(app)

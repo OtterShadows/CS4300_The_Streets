@@ -66,16 +66,47 @@
                 <div class="stat-card">
                     <div class="stat-icon">⭐</div>
                     <div class="stat-content">
-                        <div class="stat-label">Reputation Score</div>
-                        <div class="stat-value" id="grid-rating">9.2</div>
+                        <div class="stat-label-container">
+                            <span class="stat-label">Reputation Score</span>
+                            <div class="info-tooltip">
+                                <span class="info-icon" title="Learn more">?</span>
+                                <div class="tooltip-content">
+                                    <strong>Reputation Score (0-10)</strong>
+                                    <p>A numerical rating based on sentiment analysis of community comments. Higher
+                                        scores indicate more positive reception.</p>
+                                    <p><strong>Range:</strong> 0 (Very Negative) to 10 (Extremely Positive)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="grid-rating" style="cursor: pointer;"
+                            onclick="showReputationExplanation()">9.2</div>
+                        <div class="score-explanation" id="reputation-explanation"
+                            style="display: none; font-size: 12px; margin-top: 6px; color: var(--text-secondary); font-weight: normal; font-family: 'Open Sans', sans-serif;">
+                        </div>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon">💬</div>
                     <div class="stat-content">
-                        <div class="stat-label">Community Consensus</div>
-                        <div class="stat-value" id="grid-sentiment">Very Positive</div>
+                        <div class="stat-label-container">
+                            <span class="stat-label">Community Consensus</span>
+                            <div class="info-tooltip">
+                                <span class="info-icon" title="Learn more">?</span>
+                                <div class="tooltip-content">
+                                    <strong>Community Consensus</strong>
+                                    <p>Describes the overall sentiment of community discussions, derived from comment
+                                        analysis.</p>
+                                    <p><strong>Range:</strong> Very Negative → Negative → Mixed → Positive → Very
+                                        Positive</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="grid-sentiment" style="cursor: pointer;"
+                            onclick="showConsensusExplanation()">Very Positive</div>
+                        <div class="score-explanation" id="consensus-explanation"
+                            style="display: none; font-size: 12px; margin-top: 6px; color: var(--text-secondary); font-weight: normal; font-family: 'Open Sans', sans-serif;">
+                        </div>
                     </div>
                 </div>
 
@@ -93,7 +124,9 @@
                 <!-- Graph Section -->
                 <div class="graph-section">
                     <h3>📈 Popularity Trend</h3>
-                    <p class="graph-context">This is a chart showing how positively or negatively <span id="chart-character-name">character</span> has been viewed over time in the r/PirateFolk community.</p>
+                    <p class="graph-context">This is a chart showing how positively or negatively <span
+                            id="chart-character-name">character</span> has been viewed over time in the r/PirateFolk
+                        community.</p>
                     <div
                         style="position: relative; height: 300px; width: 100%; background-color: #f5f5f5; border-radius: 4px;">
                         <canvas id="ratingsChart"></canvas>
@@ -105,7 +138,8 @@
                     <div class="evidence-header">
                         <div>
                             <h3>💬 Community Evidence</h3>
-                            <p class="section-subtitle">This is what people have been saying about "<span id="query-topic">character</span>" in r/PirateFolk</p>
+                            <p class="section-subtitle">This is what people have been saying about "<span
+                                    id="query-topic">character</span>" in r/PirateFolk</p>
                         </div>
                         <div class="filter-toggle">
                             <label for="filter-switch">Filter sensitive content</label>
@@ -139,6 +173,112 @@
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        // Generate LLM-powered character summary
+        async function generateCharacterSummary(characterName, characterData) {
+            try {
+                const response = await fetch('/character-summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        character: characterName,
+                        reputation_score: characterData.currentRating,
+                        consensus: characterData.sentiment,
+                        total_comments: characterData.total_comments,
+                        top_comments: characterData.comments.slice(0, 3)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.summary || characterData.summary;
+            } catch (err) {
+                console.error('Failed to generate LLM summary:', err);
+                throw err;
+            }
+        }
+
+        // Store current character name for explanations
+        let currentCharacterName = '';
+
+        // Show LLM-generated reputation explanation
+        async function showReputationExplanation() {
+            const scoreElement = document.getElementById('grid-rating');
+            const explanationElement = document.getElementById('reputation-explanation');
+
+            if (!scoreElement || !explanationElement) return;
+
+            const score = parseFloat(scoreElement.textContent);
+
+            // Toggle display
+            if (explanationElement.style.display !== 'none') {
+                explanationElement.style.display = 'none';
+                return;
+            }
+
+            explanationElement.textContent = 'Loading explanation...';
+            explanationElement.style.display = 'block';
+
+            try {
+                const response = await fetch('/reputation-explanation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        score: score,
+                        character: currentCharacterName
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                explanationElement.textContent = data.explanation || 'Could not generate explanation.';
+            } catch (err) {
+                console.error('Failed to get reputation explanation:', err);
+                explanationElement.textContent = 'Could not load explanation. Try again later.';
+            }
+        }
+
+        // Show LLM-generated consensus explanation
+        async function showConsensusExplanation() {
+            const consensusElement = document.getElementById('grid-sentiment');
+            const explanationElement = document.getElementById('consensus-explanation');
+
+            if (!consensusElement || !explanationElement) return;
+
+            const consensus = consensusElement.textContent.trim();
+
+            // Toggle display
+            if (explanationElement.style.display !== 'none') {
+                explanationElement.style.display = 'none';
+                return;
+            }
+
+            explanationElement.textContent = 'Loading explanation...';
+            explanationElement.style.display = 'block';
+
+            try {
+                const response = await fetch('/consensus-explanation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        consensus: consensus,
+                        character: currentCharacterName
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                explanationElement.textContent = data.explanation || 'Could not generate explanation.';
+            } catch (err) {
+                console.error('Failed to get consensus explanation:', err);
+                explanationElement.textContent = 'Could not load explanation. Try again later.';
+            }
         }
 
         // List of sensitive words to filter
@@ -390,9 +530,28 @@
                     const heroRank = document.getElementById('hero-rank');
                     const heroSummary = document.getElementById('hero-summary');
 
+                    currentCharacterName = characterKey;
                     if (heroName) heroName.textContent = characterKey
                     if (heroRank) heroRank.textContent = character.rank;
-                    if (heroSummary) heroSummary.textContent = character.summary;
+
+                    // Hide previous explanations
+                    const reputationExp = document.getElementById('reputation-explanation');
+                    const consensusExp = document.getElementById('consensus-explanation');
+                    if (reputationExp) reputationExp.style.display = 'none';
+                    if (consensusExp) consensusExp.style.display = 'none';
+
+                    // Try to generate LLM summary if available, otherwise use default
+                    if (heroSummary) {
+                        heroSummary.textContent = "Loading summary...";
+                        generateCharacterSummary(characterKey, character)
+                            .then(llmSummary => {
+                                if (heroSummary) heroSummary.textContent = llmSummary;
+                            })
+                            .catch(err => {
+                                console.log("LLM summary unavailable, using default:", err);
+                                if (heroSummary) heroSummary.textContent = character.summary;
+                            });
+                    }
 
                     // Update character image
                     const artworkPlaceholder = document.getElementById('artwork-placeholder');
