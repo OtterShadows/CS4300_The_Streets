@@ -664,6 +664,52 @@ body {
     text-align: center;
 }
 
+.intro-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.intro-section h2 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 24px;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-red) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.intro-text {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 12px 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.intro-subtext {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.intro-subtext strong {
+    color: var(--text-secondary);
+}
+
 .suggestions-title {
     font-family: 'Montserrat', sans-serif;
     font-size: 14px;
