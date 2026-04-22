@@ -72,7 +72,7 @@ names_and_variants = {
     "Riku Doldo III": ["Riku"],
     "Trafalgar D. Water Law": ["Law", "Trafalgar Law"],
     "Bepo": [],
-    "Kin'emon": [],
+    "Kin'emon": ["Kinemon"],
     "Momonosuke": [],
     "Kanjuro": [],
     "Raizo": [],
@@ -80,7 +80,7 @@ names_and_variants = {
     "Kawamatsu": [],
     "Ashura Doji": [],
     "Inuarashi": [],
-    "Nekomamushi": [],
+    "Nekomamushi": ["Neko"],
     "Carrot": [],
     "Yamato": [],
     "Pedro": [],
@@ -243,7 +243,6 @@ names_and_variants = {
     "Chess": [],
     "Kuromarimo": [],
     "Don Krieg": [],
-    "Gin": [],
     "Pearl": [],
     "Kuro": [],
     "Sham": ["Siam"],
@@ -288,7 +287,6 @@ names_and_variants = {
     "Gatherine": ["Gyatharin"],
     "Grabar": ["Grabba"],
     "Hasami": ["Scissors", "Pincers"],
-    "Holy": ["Holly"],
     "Ikaros Much": ["Icaros Muhhi"],
     "Kumashi": ["Kumacy", "Kuma-C"],
     "Matsuge": ["Eyelashes", "Eyelash", "Lashes"],
@@ -610,9 +608,9 @@ def write_reverse_postings_alias_to_csv(reverse_postings, filename="src/language
 
 
 # character_counts_short = get_character_counts_short(character_counts, 25)
-# write_char_counts_to_csv(character_counts_short, "src/language_processing/csv/new_character_counts.csv")
+# write_char_counts_to_csv(character_counts_short, "src/language_processing/csv/new_character_counts_(well).csv")
 
-#aliases_to_csv(names_and_variants, output_path="src/language_processing/csv/name_to_aliases.csv")
+# aliases_to_csv(names_and_variants, output_path="src/language_processing/csv/name_to_aliases.csv")
     # creates csv mapping character to alias
 
 
@@ -706,3 +704,37 @@ def write_counts_to_csv(filename="character_counts.csv"):
     df = df.sort_values(by="count", ascending=False)
 
     df.to_csv(filename, index=False)
+
+
+
+
+# ONE TIME FUNCTIONS ------------------------------------------------------------------------
+
+"""
+def get_well_characters_from_cc(input_cc_full_path):
+    char_list = []
+    cc = pd.read_csv(input_cc_full_path)
+    for idx, row in cc.iterrows():
+        character = row["character"]
+        char_list.append(character)
+    print(char_list)
+    return char_list
+
+
+input_cc_full_path = os.path.join(current_dir, "csv", "character_counts_(well).csv")
+
+filtered_characters = get_well_characters_from_cc(input_cc_full_path)
+
+# def filter_csv_by_characters(input_csv_path, output_csv_path, characters_to_keep):
+    df = pd.read_csv(input_csv_path)
+    filtered_df = df[df['character'].isin(characters_to_keep)]
+    filtered_df.to_csv(output_csv_path, index=False)
+    return filtered_df
+
+
+# filter_csv_by_characters(
+    os.path.join(current_dir, "csv", "reverse_postings.csv"),
+    os.path.join(current_dir, "csv", "reverse_postings_(well).csv"),
+    filtered_characters
+    )
+"""

@@ -6,6 +6,7 @@
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 from language_processing import character_counts
+# import character_counts
 
 try:
     nltk.data.find('sentiment/vader_lexicon.zip')

@@ -12,7 +12,7 @@ from rapidfuzz.distance import Levenshtein
 from scipy.sparse.linalg import svds
 
 
-reverse_postings_filename = "reverse_postings.csv"
+reverse_postings_filename = "reverse_postings_(well).csv"
 piratefolk_comments_filename = "piratefolk_comments_(v2).csv"
 
 # try referencing csv files by joining path names

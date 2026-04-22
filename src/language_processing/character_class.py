@@ -1,13 +1,14 @@
 import os
 import pandas as pd
 from language_processing import sent_anal
+# import sent_anal
 from datetime import datetime
 import re
 import joblib 
 # from src.language_processing import similarity_calc
 
 piratefolk_comments_filename = "piratefolk_comments_(v2).csv"
-reverse_postings_filename = "reverse_postings.csv"
+reverse_postings_filename = "reverse_postings_(well).csv"
 
 #To speed up multiple calls of the functions.
 comment_cache = {}
@@ -225,6 +226,8 @@ comments_df, postings_df = load_data()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 character_data_filename = "character_data.pkl"
 character_data_filepath = os.path.join(current_dir, "data", character_data_filename)
+# print("Creating new character_data.pkl")
 # joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), character_data_filepath)
+# print("Created new character_data.pkl")
 
 

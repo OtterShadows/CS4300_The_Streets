@@ -72,10 +72,12 @@ def json_search(query):
         
     #first check if the query matches a character name (with fuzzy matching)
     if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
+        print(f"Using character_counts.fuzzy_match_character")
         result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
     # calculate the similarity of the query with the character "docs" and 
     # return the most similar character
     else:
+        print(f"Using svd_testing.closest_doc_to_query")
         result = svd_testing.closest_doc_to_query(query)
     print(f"Received search query: '{query}' -> matched character: '{result}'")
 
@@ -85,17 +87,25 @@ def json_search(query):
         comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
         k = 50
     )
+
+    relevant_comments = svd_testing.svd_retrieve_k_sim_comments(
+        character = result,
+        query = query,
+        tfidf_matrix = tfidf_matrix,
+        k = 30
+    )
+
     print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
 
 
-    relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
+    # relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
 
     comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
-    for (id, score) in relevant_comments_containing_character:
+    for (id, score) in relevant_comments:
         c = character_class.create_comment(id, score, comments_df)
         if c is not None:
             comment_list.append(c)
-    print(f"DEBUG: Created {len(comment_list)} Comment objects from {len(relevant_comments_containing_character)} prioritized comments")
+    print(f"DEBUG: Created {len(comment_list)} Comment objects.")
 
     return json.dumps({
         "character": result, # string of most similar character to query
