@@ -298,9 +298,6 @@ names_and_variants = {
     "Koza": ["Kohza"],
 }
 
-names_and_variants_short = {
-
-}
 
 #first function get counts of characters output to  text file
 load_nlp = True
@@ -357,19 +354,14 @@ def get_names_and_variants_short(names_and_variants, character_counts_input_path
 
 
 
+
+
 # FUNCTIONS ---------------------------------------------------------------------------------------
 
-def write_char_counts_to_csv(character_counts: Counter, output_path: str):
-    with open(output_path, mode="w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["character", "count"])
-        for character, count in character_counts.items():
-            writer.writerow([character, count])
 
 
 #create dictionary of touples (text, list of characters in text, time)
 #create reverse postings for sent anal output to text file
-
 def createReversePostings():
     # docs = docs
     # comments = comments
@@ -386,54 +378,13 @@ def createReversePostings():
 
     return reverse_postings
 
-def write_counts_to_csv(filename="character_counts.csv"):
-    counts = charCount()
-    
-    df = pd.DataFrame(counts.items(), columns=["character", "count"])
-    df = df.sort_values(by="count", ascending=False)
 
-    df.to_csv(filename, index=False)
-
-
-
-# fuzzy match query against all character names and aliases, return canonical name
-# intending to be used in routes.py
-def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], threshold=0.3) -> str:
-    best_match = None
-    best_distance = float('inf')
-    query_lower = query.lower()
-    for char, aliases in names_and_variants.items():
-        for name in [char] + aliases:
-            distance = Levenshtein.distance(query_lower, name.lower())
-            normalized = distance / max(len(query_lower), len(name))
-            if normalized < best_distance:
-                best_distance = normalized
-                best_match = char
-    if best_distance <= threshold:
-        return best_match
-    return ""
-
-#print(fuzzy_match_character("stocks are up", names_and_variants))
 
 # returns true if edit distance is less than or equal to threshold
 def fuzzy_edit_distance(source: str, target: str, threshold: int = 0):
     return Levenshtein.distance(source, target) <= threshold
     # using pre-implemented edit-distance from rapidfuzz because it ended up being like 
     # 50x times faster when running code
-
-
-
-# convert names_and_variants dict to csv file
-# input: dict mapping each character name to list of aliases
-# output: csv with columns character, alias
-def aliases_to_csv(names_and_variants: dict[str, list[str]], output_path="src/language_processing/csv/character_aliases.csv"):
-    with open(output_path, mode="w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["character", "alias"])
-        for character, aliases in names_and_variants.items():
-            print(f"character: {character}, aliases: {aliases}")
-            for alias in aliases:
-                writer.writerow([character, alias])
 
 
 
@@ -452,23 +403,6 @@ def char_count_alias(names_and_variants: dict[str, list[str]]):
         if loop_counter % 100 == 0:
             print(f"Loop counter: {loop_counter}")
     return char_counts
-
-
-
-def write_reverse_postings_to_csv(filename="src/language_processing/csv/reverse_postings_alias.csv"):
-    reverse_postings = createReversePostings()
-    
-    # Convert to DataFrame
-    df = pd.DataFrame(
-        [(person, ids) for person, ids in reverse_postings.items()],
-        columns=["character", "comment_ids"]
-    )
-    
-    # Optionally convert list to string for CSV
-    df["comment_ids"] = df["comment_ids"].apply(lambda x: ",".join(map(str, x)))
-    
-    # Write to CSV
-    df.to_csv(filename, index=False, encoding="utf-8")
 
 
 
@@ -495,7 +429,6 @@ def alias_to_canonical_dict_to_csv(alias_to_canonical: dict[str, str], output_pa
 
 
 
-# UNFINISHED?
 # create inverted index mapping character names to comment ids where they (or some alias) are mentioned
 # returns dict[str, list[str]]
 def create_reverse_postings_alias(filename="src/language_processing/csv/reverse_postings_alias.csv"):
@@ -527,20 +460,8 @@ def create_reverse_postings_alias(filename="src/language_processing/csv/reverse_
     return reverse_postings
 
 
-def write_reverse_postings_alias_to_csv(reverse_postings, filename="src/language_processing/csv/reverse_postings_alias.csv"):
-    # Convert to DataFrame
-    df = pd.DataFrame(
-        [(person, ids) for person, ids in reverse_postings.items()],
-        columns=["character", "comment_ids"]
-    )
-    
-    # Optionally convert list to string for CSV
-    df["comment_ids"] = df["comment_ids"].apply(lambda x: ",".join(map(str, x)))
-    
-    # Write to CSV
-    df.to_csv(filename, index=False, encoding="utf-8")
 
-#create nicknames with the standard W or L slander format, e.g. "Zoro" -> [Loro, Woro]
+# helper for create_slander_nicknames
 def transform(name: str):
         vowels = set("aeiou")
         name = name.strip()
@@ -555,6 +476,10 @@ def transform(name: str):
 
         # consonant case → replace first letter with l or w
         return [f"l{name[1:]}", f"w{name[1:]}"]
+
+
+
+#create nicknames with the standard W or L slander format, e.g. "Zoro" -> [Loro, Woro]
 def create_slander_nicknames(characters: list[str]) -> dict[str, list[str]]:
     updated = {}
     for char, aliases in names_and_variants.items():
@@ -568,8 +493,97 @@ def create_slander_nicknames(characters: list[str]) -> dict[str, list[str]]:
         updated[char] = list(new_aliases)
     return updated
 
+
+
 names_and_variants = create_slander_nicknames(names_and_variants)
-#print(names_and_variants["Roronoa Zoro"])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# WRITE TO CSV FUNCTIONS ----------------------------------------------------------
+
+# input:
+#   - Counter: character counts
+#   - str: output path
+# output:
+#   - none (write to csv file)
+def write_char_counts_to_csv(character_counts: Counter, output_path: str):
+    with open(output_path, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["character", "count"])
+        for character, count in character_counts.items():
+            writer.writerow([character, count])
+
+
+
+# convert names_and_variants dict to csv file
+# input: dict mapping each character name to list of aliases
+# output: csv with columns character, alias
+def aliases_to_csv(names_and_variants: dict[str, list[str]], output_path="src/language_processing/csv/character_aliases.csv"):
+    with open(output_path, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["character", "alias"])
+        for character, aliases in names_and_variants.items():
+            print(f"character: {character}, aliases: {aliases}")
+            for alias in aliases:
+                writer.writerow([character, alias])
+
+
+# input:
+#   - output filename
+# output:
+#   - none (write to csv)
+def write_reverse_postings_to_csv(filename="src/language_processing/csv/reverse_postings_alias.csv"):
+    reverse_postings = createReversePostings()
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(
+        [(person, ids) for person, ids in reverse_postings.items()],
+        columns=["character", "comment_ids"]
+    )
+    
+    # Optionally convert list to string for CSV
+    df["comment_ids"] = df["comment_ids"].apply(lambda x: ",".join(map(str, x)))
+    
+    # Write to CSV
+    df.to_csv(filename, index=False, encoding="utf-8")
+
+
+# input:
+#   - reverse postings dict (name -> list of ids)
+#   - output filename
+# output:
+#   - none (write to csv)
+def write_reverse_postings_alias_to_csv(reverse_postings, filename="src/language_processing/csv/reverse_postings_alias.csv"):
+    # Convert to DataFrame
+    df = pd.DataFrame(
+        [(person, ids) for person, ids in reverse_postings.items()],
+        columns=["character", "comment_ids"]
+    )
+    
+    # Optionally convert list to string for CSV
+    df["comment_ids"] = df["comment_ids"].apply(lambda x: ",".join(map(str, x)))
+    
+    # Write to CSV
+    df.to_csv(filename, index=False, encoding="utf-8")
+
 
 
 
@@ -600,10 +614,14 @@ names_and_variants = create_slander_nicknames(names_and_variants)
 
 
 
-
-character_counts_input_path = "src/language_processing/csv/new_character_counts.csv"
+"""
+character_counts_input_path = "src/language_processing/csv/character_counts.csv"
 names_and_variants_short = get_names_and_variants_short(names_and_variants, character_counts_input_path, 25)
 aliases_to_csv(names_and_variants_short)
+"""
+
+
+
 
 
 
@@ -631,3 +649,55 @@ aliases_to_csv(names_and_variants_short)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# BANISHED (UNUNSED) FUNCTIONS -------------------------------------------------------------
+
+# fuzzy match query against all character names and aliases, return canonical name
+# intending to be used in routes.py
+def fuzzy_match_character(query: str, names_and_variants: dict[str, list[str]], threshold=0.3) -> str:
+    best_match = None
+    best_distance = float('inf')
+    query_lower = query.lower()
+    for char, aliases in names_and_variants.items():
+        for name in [char] + aliases:
+            distance = Levenshtein.distance(query_lower, name.lower())
+            normalized = distance / max(len(query_lower), len(name))
+            if normalized < best_distance:
+                best_distance = normalized
+                best_match = char
+    if best_distance <= threshold:
+        return best_match
+    return ""
+
+def write_counts_to_csv(filename="character_counts.csv"):
+    counts = charCount()
+    
+    df = pd.DataFrame(counts.items(), columns=["character", "count"])
+    df = df.sort_values(by="count", ascending=False)
+
+    df.to_csv(filename, index=False)
