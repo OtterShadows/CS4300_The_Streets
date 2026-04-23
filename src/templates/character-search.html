@@ -62,7 +62,8 @@
                 <p class="suggestions-title">Try these searches:</p>
                 <div class="suggestions-grid">
                     <button class="suggestion-btn" onclick="searchSuggestion('biggest coward')">biggest coward</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('Who is potential man?')">Who is potential man?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Luffy Katakuri fight')">Luffy Katakuri
+                        fight</button>
                     <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the goat?')">Who's the
                         goat?</button>
                 </div>
@@ -83,13 +84,7 @@
                         <div class="hero-label">Top Result for Your Query</div>
                         <h1 id="hero-name">-</h1>
                         <div class="hero-description" id="hero-summary">-</div>
-                        <div class="hero-label">Related Characters</div>
-                        <!-- Dynamic buttons go here -->
-                        <div id="related-buttons">
-                            <button id="related-0" class="suggestion-btn" style="display:none;"></button>
-                            <button id="related-1" class="suggestion-btn" style="display:none;"></button>
-                            <button id="related-2" class="suggestion-btn" style="display:none;"></button>
-                        </div>
+                        <button class="read-more-btn" onclick="expandSummary()">Related Info</button>
                     </div>
                     <div class="hero-artwork">
                         <div class="artwork-placeholder" id="artwork-placeholder">
@@ -546,9 +541,8 @@
                     console.log('Full response data:', data);
                     const characterName = data.character || 'ERROR';
                     const retrievedComments = data.relevant_comments || 'ERROR';
-                    const related = data.related || [];
                     console.log(`Best character match: "${characterName}"`);
-                    displayCharacterResults(characterName, trimmedQuery, retrievedComments, related);
+                    displayCharacterResults(characterName, trimmedQuery, retrievedComments);
                 })
                 .catch(err => {
                     console.log(`Error during search for "${characterName}":`, err);
@@ -652,41 +646,8 @@
                     // Update retrieved documents
                     updateRetrieved(character, retrievedComments);
 
-                    //update related info buttona
-                    // if related is not empty, make related character buttons visible and populate with related character names
-                    const btn0 = document.getElementById('related-0');
-                    const btn1 = document.getElementById('related-1');
-                    const btn2 = document.getElementById('related-2');
-                    if (related.length !=0){
-                        const name0 = related[0]
-                        const name1 = related[1]
-                        const name2 = related[2]
-                        btn0.style.display = 'inline-block';
-                        btn0.textContent = name0;
-                        btn0.onclick = function() {searchSuggestion(name0)}; 
-                        btn1.style.display = 'inline-block';
-                        btn1.textContent = name1;
-                        btn1.onclick = function() {searchSuggestion(name1)}; 
-                        btn2.style.display = 'inline-block';
-                        btn2.textContent = name2;
-                        btn2.onclick = function() {searchSuggestion(name2)};
-
-        }              else {
-                        // if no related characters, hide the buttons 
-                        btn0.style.display = 'none';
-                        btn1.style.display = 'none';
-                        btn2.style.display = 'none';
-                    }
-
-
-    
-
-                    
-
                     // Scroll to results
                     document.getElementById('results-container').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-                    
                 })
                 .catch(err => {
                     console.error(`Failed to fetch character data for ${characterKey}:`, err);
