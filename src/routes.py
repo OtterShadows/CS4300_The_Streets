@@ -61,6 +61,25 @@ def template_json_search(query):
         })
     return json.dumps(matches)
 
+#giving names to each of the discovered svd dimensions
+svd_dimension_names = {
+    0: "Writing Scaling",
+    1: "Related to the Yonko Saga",
+    2: "Present for Roof Piece",
+    3: "Related to the WG",
+    4: "Related to the Marines",
+    5: "Devil Fruit Discussion",
+    6: "Theories and Speculation",
+    7: "Transformation Powers",
+    8: "Related to Major Arcs",
+    9: "Sword users (NOT swordsmen)",
+    10: "Swordsmen (Mihawk upscale btw)",
+    11: "Emotional Backstory",
+    12: "Related to Enies Lobby/Buster Calls",
+    13: "Important to the Final Saga",
+    14: "REAL Top Tiers"
+}
+
 # (Overwriting the above)
 # Context: placing the search performing logic in this helper for search route;
 # to mimic template's control flow going forward with the LLM integration
@@ -114,9 +133,16 @@ def json_search(query, use_svd):
             comment_list.append(c)
     print(f"DEBUG: Created {len(comment_list)} Comment objects.")
 
+    #return top dimensions for the character as well, for use in the frontend
+    char_idx = characters.index(result)
+    scores = svd_words_compressed[char_idx]
+    top_dimensions = scores.argsort()[-3:][::-1]
+    top_dim_names = [svd_dimension_names.get(d) for d in top_dimensions]
+
     return json.dumps({
         "character": result, # string of most similar character to query
-        "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list]
+        "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list],
+        "top_dimensions": top_dim_names
     })
 
 

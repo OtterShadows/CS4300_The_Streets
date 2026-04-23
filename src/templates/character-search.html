@@ -85,6 +85,8 @@
                         <h1 id="hero-name">-</h1>
                         <div class="hero-description" id="hero-summary">-</div>
                         <button class="read-more-btn" onclick="expandSummary()">Related Info</button>
+                        <div class="hero-label">Top Dimensions for Your Character</div>
+                        <div class="hero-description" id="top-dimensions"></div>
                     </div>
                     <div class="hero-artwork">
                         <div class="artwork-placeholder" id="artwork-placeholder">
@@ -541,8 +543,9 @@
                     console.log('Full response data:', data);
                     const characterName = data.character || 'ERROR';
                     const retrievedComments = data.relevant_comments || 'ERROR';
+                    const top_dims = data.top_dimensions || [];
                     console.log(`Best character match: "${characterName}"`);
-                    displayCharacterResults(characterName, trimmedQuery, retrievedComments);
+                    displayCharacterResults(characterName, trimmedQuery, retrievedComments, top_dims);
                 })
                 .catch(err => {
                     console.log(`Error during search for "${characterName}":`, err);
@@ -554,7 +557,7 @@
         // which returns all the character data needed to display on the page (including image_url)
         // (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved, image_url)
         // Then, display this data on the page.
-        function displayCharacterResults(characterKey, query, retrievedComments) {
+        function displayCharacterResults(characterKey, query, retrievedComments, topDimensions) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
             }
@@ -639,6 +642,22 @@
                     if (queryTopic) queryTopic.textContent = query;
                     if (chartCharacterName) chartCharacterName.textContent = characterKey;
                     if (retrievedCount) retrievedCount.textContent = character.retrieved.length;
+
+                    //update top dimensions
+                    const dimensionsContainer = document.getElementById('top-dimensions');
+                    if (dimensionsContainer) {
+                        dimensionsContainer.innerHTML = '';
+                        if (topDimensions.length > 0) {
+                            topDimensions.forEach(dim => {
+                                const dimEl = document.createElement('div');
+                                dimEl.className = 'dimension';
+                                dimEl.textContent = `${dim.name}: ${dim.value.toFixed(3)}`;
+                                dimensionsContainer.appendChild(dimEl);
+                            });
+                        } else {
+                            dimensionsContainer.textContent = 'No significant dimensions found.';
+                        }
+                    }
 
                     // Update chart
                     updateChart(character, query);
