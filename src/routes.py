@@ -70,16 +70,16 @@ def json_search(query, use_svd):
     if not query.strip():
         return json.dumps({"error": "empty query"})
         
-    #first check if the query matches a character name (with fuzzy matching)
-    # if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
-    #     print(f"Using character_counts.fuzzy_match_character")
-    #     result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
+    # first check if the query matches a character name (with fuzzy matching)
+    if character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well) != "":
+        print(f"Using character_counts.fuzzy_match_character")
+        result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well)
     # calculate the similarity of the query with the character "docs" and 
     # return the most similar character
-    # else:
-    print(f"Using svd_testing.closest_doc_to_query")
-    result = svd_testing.closest_doc_to_query(query)
-    print(f"Received search query: '{query}' -> matched character: '{result}'")
+    else:
+        print(f"Using svd_testing.closest_doc_to_query")
+        result = svd_testing.closest_doc_to_query(query)
+        print(f"Received search query: '{query}' -> matched character: '{result}'")
 
     
     if use_svd:
