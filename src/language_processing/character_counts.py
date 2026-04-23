@@ -41,7 +41,7 @@ names_and_variants = {
     "Sabo": [],
     "Monkey D. Garp": ["Garp"],
     "Monkey D. Dragon": ["Dragon"],
-    "Koby": ["Coby", "Cobby"],
+    "Koby": ["Coby"],
     "Helmeppo": [],
     "Makino": [],
     "Dadan": [],
