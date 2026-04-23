@@ -271,8 +271,54 @@ def register_routes(app):
     @app.route("/search")
     def search():
         query = request.args.get("q", "")
+        
+        if not query.strip():
+            return json.dumps({"error": "empty query"})
+        
+        #first check if the query matches a character name (with fuzzy matching)
+        if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
+            result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
+            related = svd_testing.closest_doc_to_query(result)[1:4]
+        # calculate the similarity of the query with the character "docs" and 
+        # return the most similar character
+        else:
+            result = svd_testing.closest_doc_to_query(query)[0]
+            related = svd_testing.closest_doc_to_query(query)[1:4]
+            
+        print(related)
+        print(f"Received search query: '{query}' -> matched character: '{result}'")
+
+        # calculate top k relevant comments
+        # relevant_comments = similarity_calc.retrieve_k_sim_comments(
+        #     query = query,
+        #     vectorizer = similarity_calc.comment_term_vectorizer,
+        #     comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
+        #     ids = similarity_calc.comment_ids,
+        #     texts = similarity_calc.texts,
+        #     k = 1000
+        # ) # should return list of tuples of form (id, sim_score)
+
+        relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
+            character = result,
+            query = query,
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
+        print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
+
+
+        relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
+
+        comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
+        for (id, score) in relevant_comments_containing_character:
+            c = character_class.create_comment(id, score, comments_df)
+            if c is not None:
+                comment_list.append(c)
+        print(f"DEBUG: Created {len(comment_list)} Comment objects from {len(relevant_comments_containing_character)} prioritized comments")
+
         use_svd = request.args.get("use_svd", "false").lower() == "true"
         character_and_comments_json = json_search(query, use_svd) # get character name and relevant comments from query
+        character_and_comments_json["related"] = related
         return character_and_comments_json
     
     @app.route("/csearch")
