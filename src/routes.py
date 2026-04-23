@@ -19,8 +19,8 @@ from sklearn.preprocessing import normalize
 from language_processing import character_counts
 
 # ── AI toggle ──
-USE_LLM = False
-# USE_LLM = True
+#USE_LLM = False
+USE_LLM = True
 # ───────────────
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where routes.py lives
@@ -40,6 +40,85 @@ comments_df, postings_df = character_class.load_data()
 # ===== One Piece GraphQL API Setup =====
 ONE_PIECE_API_URL = "https://onepieceql.com/api/graphql"
 _api_cache = {}  # Cache for API data
+
+# Copying from flask template for reference, not for use in project
+# input: query
+# output: list of matching episodes (title, descr, imdb_rating) in json format
+def template_json_search(query):
+    if not query or not query.strip():
+        query = "Kardashian"
+    results = db.session.query(Episode, Review).join(
+        Review, Episode.id == Review.id
+    ).filter(
+        Episode.title.ilike(f'%{query}%')
+    ).all()
+    matches = []
+    for episode, review in results:
+        matches.append({
+            'title': episode.title,
+            'descr': episode.descr,
+            'imdb_rating': review.imdb_rating
+        })
+    return json.dumps(matches)
+
+# (Overwriting the above)
+# Context: placing the search performing logic in this helper for search route;
+# to mimic template's control flow going forward with the LLM integration
+# Input: query (string)
+# Output: json with character name, and relevant comments (list of dicts with user, sim_score, etc.)
+def json_search(query, use_svd):
+    if not query.strip():
+        return json.dumps({"error": "empty query"})
+        
+    #first check if the query matches a character name (with fuzzy matching)
+    if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
+        print(f"Using character_counts.fuzzy_match_character")
+        result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
+    # calculate the similarity of the query with the character "docs" and 
+    # return the most similar character
+    else:
+        print(f"Using svd_testing.closest_doc_to_query")
+        result = svd_testing.closest_doc_to_query(query)
+    print(f"Received search query: '{query}' -> matched character: '{result}'")
+
+    
+    if use_svd:
+        print("Using SVD for comment retrieval")
+        relevant_comments = svd_testing.svd_retrieve_k_sim_comments(
+            character = result,
+            query = query,
+            tfidf_matrix = tfidf_matrix,
+            k = 30
+        )
+    else:
+        print("Using original similarity_calc for comment retrieval")
+        relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
+            character = result,
+            query = query,
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
+    
+
+    
+
+    print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
+
+
+    # relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
+
+    comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
+    for (id, score) in relevant_comments:
+        c = character_class.create_comment(id, score, comments_df)
+        if c is not None:
+            comment_list.append(c)
+    print(f"DEBUG: Created {len(comment_list)} Comment objects.")
+
+    return json.dumps({
+        "character": result, # string of most similar character to query
+        "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list]
+    })
+
 
 def fetch_all_characters():
     """Fetch all One Piece characters from the GraphQL API with pagination"""
@@ -118,13 +197,16 @@ def fetch_all_characters():
     
     return {}
 
+# Taken from get_character_image, placed here to load upon loading website, not upon search
+# Fetch API data first (cached after first load)
+# characters = fetch_all_characters()
+
 @lru_cache(maxsize=128)
 def get_character_image(character_name):
     """
     Fetch character image from the official One Piece GraphQL API.
     Supports multiple name formats and falls back to placeholder if not found.
     """
-    # Fetch API data first (cached after first load)
     characters = fetch_all_characters()
     
     # Try exact match first
@@ -169,6 +251,9 @@ def ensure_character_data_exists():
 
 # Ensure character data exists before loading
 ensure_character_data_exists()
+# In json form,
+# A dict mapping each character name to a dict of their data
+# (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved)
 character_data = joblib.load(character_data_path)
 
 # calculates similarity between query and character docs, returns best match's name
@@ -186,51 +271,9 @@ def register_routes(app):
     @app.route("/search")
     def search():
         query = request.args.get("q", "")
-        
-        if not query.strip():
-            return json.dumps({"error": "empty query"})
-        
-        #first check if the query matches a character name (with fuzzy matching)
-        if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
-            result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
-        # calculate the similarity of the query with the character "docs" and 
-        # return the most similar character
-        else:
-            result = svd_testing.closest_doc_to_query(query)
-        print(f"Received search query: '{query}' -> matched character: '{result}'")
-
-        # calculate top k relevant comments
-        # relevant_comments = similarity_calc.retrieve_k_sim_comments(
-        #     query = query,
-        #     vectorizer = similarity_calc.comment_term_vectorizer,
-        #     comment_term_tfidf_matrix = similarity_calc.comment_term_tfidf_matrix,
-        #     ids = similarity_calc.comment_ids,
-        #     texts = similarity_calc.texts,
-        #     k = 1000
-        # ) # should return list of tuples of form (id, sim_score)
-
-        relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
-            character = result,
-            query = query,
-            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
-            k = 50
-        )
-        print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
-
-
-        relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
-
-        comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
-        for (id, score) in relevant_comments_containing_character:
-            c = character_class.create_comment(id, score, comments_df)
-            if c is not None:
-                comment_list.append(c)
-        print(f"DEBUG: Created {len(comment_list)} Comment objects from {len(relevant_comments_containing_character)} prioritized comments")
-
-        return json.dumps({
-            "character": result, # string of most similar character to query
-            "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score} for c in comment_list]
-        })
+        use_svd = request.args.get("use_svd", "false").lower() == "true"
+        character_and_comments_json = json_search(query, use_svd) # get character name and relevant comments from query
+        return character_and_comments_json
     
     @app.route("/csearch")
     def csearch():
@@ -258,6 +301,6 @@ def register_routes(app):
         # fallback (nothing found)
         return json.dumps({})
 
-    # if USE_LLM:
-    #     from llm_routes import register_chat_route
-    #     # register_chat_route(app, json_search)
+    if USE_LLM:
+        from llm_routes import register_chat_route
+        register_chat_route(app, json_search)
