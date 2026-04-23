@@ -2,13 +2,14 @@ from scipy.sparse.linalg import svds
 import os
 import joblib
 import matplotlib
+matplotlib.use("Agg")
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import normalize
 
 
-matplotlib.use("TkAgg")
+# matplotlib.use("TkAgg")
 
 #   quick fix for dependency issue
 #   may not be the right move, i don't know the code in this file well -DT
@@ -66,7 +67,6 @@ def closest_docs_to_query(query_vec_in, k = 5):
     asort = np.argsort(-sims)[:k+1]
     return [(i, characters[i],sims[i]) for i in asort[1:]]
 
-#editied fubction to return top 5 characters
 def closest_doc_to_query(query):
     print(f"DEBUG: Characters from model.pkl: {characters}")
     k=5
@@ -74,8 +74,8 @@ def closest_doc_to_query(query):
     query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
     sims = docs_compressed_normed.dot(query_vec)
     asort = np.argsort(-sims)[:k+1]
-    return [characters[i] for i in asort[1:]]
-#print(closest_doc_to_query("potential man"))
+    return characters[asort[1]]
+# print(closest_doc_to_query("potential man"))
             
 """for i, proj, sim in closest_docs_to_query(query_vec):
     doc_svd_vec = docs_compressed_normed[i]
@@ -83,43 +83,6 @@ def closest_doc_to_query(query):
     top_dims = [int(dim) for dim in top_dims_indices]
     print("({}, {}, {:.4f}, Top dimensions: {}) ".format(i, proj, sim, top_dims))"""
 
-def display_dims():
-    for i in range(45):
-        print("Top words in dimension", i)
-        dimension_col = words_compressed[:,i].squeeze()
-        asort = np.argsort(-dimension_col)
-        print([index_to_word[i] for i in asort[:10]])
-        print()
-
-def graph_dims(query):
-    query_tfidf = vectorizer.transform([query]).toarray()
-    query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
-    query_top_dims_indices = np.argsort(np.abs(query_vec))[::-1][:3]
-    query_top_dims = [int(dim) for dim in query_top_dims_indices]
-    plt.figure(figsize=(15, 5))
-    dimensions = range(len(query_vec))
-    colors = ['blue'] * len(query_vec)
-    for dim in query_top_dims_indices:
-        if dim < len(colors):
-            colors[dim] = 'red'
-
-    plt.bar(dimensions, query_vec, color=colors)
-    plt.xlabel('Dimension Index')
-    plt.ylabel('Dimension Magnitude')
-    plt.title(f"Query '{query}' Dimensions (Top 3 highlighted in red)")
-    plt.xticks(dimensions[::5])
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.show()
-
-#display_dims()
-"""
-graph_dims("Biggest bum")
-graph_dims("Plants")
-graph_dims("Luffy Katakuri fight")
-graph_dims("biggest coward")
-graph_dims("Gear 5")"""
-
-#make_pickle()
 # make_pickle()
 
     
