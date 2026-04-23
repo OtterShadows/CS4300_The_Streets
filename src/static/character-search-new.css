@@ -510,6 +510,18 @@ body {
     font-weight: 600;
 }
 
+/* Not going to mess with the color for now, because I know the color scheme has changed
+in the newer UI branch */
+.comment-link {
+    background-color: rgb(86, 16, 10);
+    color: #f45d42;
+    padding: 2px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+
 /* Scrollbar */
 .evidence-list::-webkit-scrollbar {
     width: 6px;

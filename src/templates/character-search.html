@@ -571,15 +571,10 @@
                     <div class="comment-meta">
                         <span class="relevance-score">Score: ${(comment.score * 100).toFixed(0)}%</span>
                         <span class="timestamp">${comment.timestamp}</span>
+                        <span class="comment-link" onclick="window.open('${comment.permalink}', '_blank')">View
+                            source</span>
                     </div>
                 `;
-
-                if (comment.hyperlink) {
-                    commentEl.style.cursor = 'pointer';
-                    commentEl.addEventListener('click', () => {
-                        window.open(comment.hyperlink, '_blank')
-                    })
-                }
                 
                 commentContainer.appendChild(commentEl);
             });
@@ -624,6 +619,8 @@
                     footerDiv.className = 'retrieved-footer';
                     footerDiv.innerHTML = `
                         <span class="relevance-score">Relevance: ${(comment.sim_score * 100).toFixed(0)}%</span>
+                        <span class="comment-link" onclick="window.open('${comment.permalink}', '_blank')">View
+                            source</span>
                     `;
 
                     commentEl.appendChild(headerDiv);
@@ -662,6 +659,14 @@
                     currentCharacterIndex = (currentCharacterIndex + 1) % characterKeys.length;
                     displayCharacterResults(characterKeys[currentCharacterIndex], 'browse');
                 });
+            }
+
+
+            if (comment.permalink) {
+                commentEl.style.cursor = 'pointer';
+                commentEl.addEventListener('click', () => {
+                    window.open(comment.permalink, '_blank')
+                })
             }
         });
     </script>

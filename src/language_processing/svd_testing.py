@@ -83,7 +83,7 @@ def closest_doc_to_query(query):
     top_dims = [int(dim) for dim in top_dims_indices]
     print("({}, {}, {:.4f}, Top dimensions: {}) ".format(i, proj, sim, top_dims))"""
 
-make_pickle()
+# make_pickle()
 
     
 
