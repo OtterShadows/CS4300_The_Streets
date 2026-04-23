@@ -66,7 +66,7 @@ def template_json_search(query):
 # to mimic template's control flow going forward with the LLM integration
 # Input: query (string)
 # Output: json with character name, and relevant comments (list of dicts with user, sim_score, etc.)
-def json_search(query, use_svd):
+def json_search(query, use_svd, related):
     if not query.strip():
         return json.dumps({"error": "empty query"})
         
@@ -78,7 +78,7 @@ def json_search(query, use_svd):
     # return the most similar character
     # else:
     print(f"Using svd_testing.closest_doc_to_query")
-    result = svd_testing.closest_doc_to_query(query)
+    result = svd_testing.closest_doc_to_query(query)[0]
     print(f"Received search query: '{query}' -> matched character: '{result}'")
 
     
@@ -116,6 +116,7 @@ def json_search(query, use_svd):
 
     return json.dumps({
         "character": result, # string of most similar character to query
+        "related": related, # list of 3 characters most similar to query (for LLM to use in generating response)
         "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list]
     })
 
@@ -282,10 +283,10 @@ def register_routes(app):
         # calculate the similarity of the query with the character "docs" and 
         # return the most similar character
         else:
-            result = svd_testing.closest_doc_to_query(query)[0]
-            related = svd_testing.closest_doc_to_query(query)[1:4]
+            docs = svd_testing.closest_doc_to_query(query)
+            result = docs[0]
+            related = docs[1:4]
             
-        print(related)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
 
         # calculate top k relevant comments
@@ -317,8 +318,7 @@ def register_routes(app):
         print(f"DEBUG: Created {len(comment_list)} Comment objects from {len(relevant_comments_containing_character)} prioritized comments")
 
         use_svd = request.args.get("use_svd", "false").lower() == "true"
-        character_and_comments_json = json_search(query, use_svd) # get character name and relevant comments from query
-        character_and_comments_json["related"] = related
+        character_and_comments_json = json_search(query, use_svd, related) # get character name and relevant comments from query
         return character_and_comments_json
     
     @app.route("/csearch")
