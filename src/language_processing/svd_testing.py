@@ -90,11 +90,19 @@ def closest_doc_to_query(query):
 #retrieve top words for each dimension in the svd matrix
 
 def top_words_for_dimension(words_compressed_in):
+
     for i in range(25):
         print("Top words in dimension", i)
         dimension_col = words_compressed[:,i].squeeze()
         asort = np.argsort(-dimension_col)
-        print([index_to_word[i] for i in asort[:15]])
+        #remove characternames from the top words, since they are not meaningful for understanding the dimension.
+        wlist = []
+        w = 0
+        while wlist.__len__() < 15:
+            if asort[w] not in characters:
+                wlist.append(index_to_word[asort[w]])
+            w+=1
+        print(wlist)
         print()
 
 # context: appropriate the SVD model made for character docs for retrieval/ranking of comments,
