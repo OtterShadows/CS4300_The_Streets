@@ -193,10 +193,14 @@ def register_routes(app):
         #first check if the query matches a character name (with fuzzy matching)
         if character_counts.fuzzy_match_character(query, character_counts.names_and_variants) != "":
             result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants)
+            related = svd_testing.closest_doc_to_query(result)[1:4]
         # calculate the similarity of the query with the character "docs" and 
         # return the most similar character
         else:
             result = svd_testing.closest_doc_to_query(query)[0]
+            related = svd_testing.closest_doc_to_query(query)[1:4]
+            
+        print(related)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
 
         # calculate top k relevant comments
@@ -229,6 +233,7 @@ def register_routes(app):
 
         return json.dumps({
             "character": result, # string of most similar character to query
+            "related": related,
             "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score} for c in comment_list]
         })
     
