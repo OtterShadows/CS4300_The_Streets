@@ -206,18 +206,44 @@ def create_character(name, postings_df, comments_df):
 def create_all_characters(postings_df, comments_df):
     return[create_character(name, postings_df, comments_df) for name in postings_df.index]
 
+def normalize_score_to_10(raw_score):
+    """
+    Normalize a raw sentiment score (unbounded) to 0-10 scale.
+    Starts at 100, adds/subtracts 20 per comment.
+    
+    Mapping:
+    - -100 or lower -> 0 (very negative)
+    - 0 -> 0-1 (neutral-ish)
+    - 100 -> 5 (neutral)
+    - 200 -> 10 (very positive)
+    - 300+ -> 10 (capped at max)
+    """
+    if raw_score <= -100:
+        return 0
+    elif raw_score <= 100:
+        # Map -100 to 100 -> 0 to 5
+        return 2.5 + (raw_score / 80)
+    elif raw_score >= 300:
+        return 10
+    else:
+        # Map 100 to 300 -> 5 to 10
+        return 5 + ((raw_score - 100) / 40)
+
+
 def characters_to_dict(characters):
     char_dict = {}
     for character in characters:
+        normalized_rating = normalize_score_to_10(character.sentiment_score)
         char_dict[character.name] = {
             "rank": character.rank,
             "total_comments": character.total_comments,
             "sentiment": character.sentiment,
-            "currentRating": character.sentiment_score,
+            "currentRating": normalized_rating,
+            "rawRating": character.sentiment_score,
             "summary": character.summary,
-            #ratings as a list of dicts
+            #ratings as a list of dicts (also normalize ratings_over_time)
             # "ratings_over_time": [(r.date.timestamp(), r.rating) for r in character.ratings_over_time],
-            "ratings_over_time": [{"date": r.date.timestamp(), "rating": r.rating, "sentiment": r.sentiment} for r in character.ratings_over_time],
+            "ratings_over_time": [{"date": r.date.timestamp(), "rating": normalize_score_to_10(r.rating), "sentiment": r.sentiment} for r in character.ratings_over_time],
             #comments as a list of dicts
             "comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "permalink": c.permalink} for c in character.comments],
             #retrieved as a list of dicts

@@ -1,7 +1,7 @@
 import json
 import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, send_from_directory
 
 load_dotenv()
 from flask_cors import CORS
@@ -10,9 +10,16 @@ from routes import register_routes
 
 # Get the directory of the current script
 current_directory = os.path.dirname(os.path.abspath(__file__))
+parent_directory = os.path.dirname(current_directory)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=os.path.join(current_directory, 'static'), static_url_path='/static')
 CORS(app)
+
+# Serve assets folder
+@app.route('/assets/<path:filename>')
+def serve_assets(filename):
+    assets_path = os.path.join(parent_directory, 'assets')
+    return send_from_directory(assets_path, filename)
 
 # Configure SQLite database - using 3 slashes for relative path
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'

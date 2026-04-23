@@ -20,18 +20,22 @@
 }
 
 body.dark-mode {
-    --bg-primary: #0a0e27;
-    --bg-secondary: #1a1f3a;
-    --bg-tertiary: #2a2f4a;
-    --text-primary: #f0f0f0;
-    --text-secondary: #b0b0b0;
-    --text-tertiary: #808080;
-    --text-light: #707070;
-    --border-color: #3a3f5a;
-    --shadow: rgba(0, 0, 0, 0.3);
-    --shadow-hover: rgba(0, 0, 0, 0.5);
-    --card-bg: #1f2438;
-    --card-border: rgba(26, 115, 232, 0.25);
+    --bg-primary: #0f0d0a;
+    --bg-secondary: #1a1512;
+    --bg-tertiary: #2a2318;
+    --text-primary: #f5f0eb;
+    --text-secondary: #d4a574;
+    --text-tertiary: #8b7355;
+    --text-light: #6b5a45;
+    --border-color: #4a3f2f;
+    --shadow: rgba(0, 0, 0, 0.5);
+    --shadow-hover: rgba(0, 0, 0, 0.7);
+    --card-bg: #1f1815;
+    --card-border: rgba(255, 140, 0, 0.25);
+    --accent-blue: #ff8c00;
+    --accent-green: #ff9d20;
+    --accent-red: #ff7f50;
+    --accent-yellow: #ffa500;
 }
 
 body {
@@ -85,6 +89,33 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+.branding-with-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}
+
+.logo-image {
+    height: 56px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
+}
+
+.logo-image:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.intro-logo {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+    margin-right: 6px;
+    vertical-align: middle;
 }
 
 .dark-mode-btn {
@@ -337,6 +368,93 @@ body {
     color: var(--accent-blue);
 }
 
+.score-explanation {
+    font-size: 12px;
+    margin-top: 6px;
+    color: var(--text-secondary);
+    font-weight: normal;
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.4;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-color);
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+/* Tooltip Styles */
+.stat-label-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+.info-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.info-icon:hover {
+    background: var(--accent-blue);
+    transform: scale(1.1);
+}
+
+.tooltip-content {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px var(--shadow-hover);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 1000;
+    min-width: 220px;
+    white-space: normal;
+    color: var(--text-primary);
+}
+
+.tooltip-content strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--accent-blue);
+}
+
+.tooltip-content p {
+    margin: 4px 0;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.info-icon:hover+.tooltip-content,
+.tooltip-content:hover {
+    opacity: 1;
+    visibility: visible;
+}
+
 /* Full Width Sections */
 .full-width-sections {
     width: 100%;
@@ -587,6 +705,52 @@ in the newer UI branch */
     margin: 0 auto 30px;
     padding: 0 40px;
     text-align: center;
+}
+
+.intro-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.intro-section h2 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 24px;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-red) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.intro-text {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 12px 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.intro-subtext {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.intro-subtext strong {
+    color: var(--text-secondary);
 }
 
 .suggestions-title {

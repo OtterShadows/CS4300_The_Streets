@@ -19,7 +19,7 @@ from sklearn.preprocessing import normalize
 from language_processing import character_counts
 
 # ── AI toggle ──
-# USE_LLM = False
+#USE_LLM = False
 USE_LLM = True
 # ───────────────
 
