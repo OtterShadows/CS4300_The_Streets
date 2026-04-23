@@ -13,7 +13,10 @@
         <div class="search-header">
             <div class="header-top">
                 <div class="header-branding">
-                    <h1>The Streets</h1>
+                    <div class="branding-with-logo">
+                        <img src="/assets/farmer-hat.png" alt="Straw Hat" class="logo-image" />
+                        <h1>The Streets</h1>
+                    </div>
                 </div>
                 <button id="dark-mode-toggle" class="dark-mode-btn" onclick="toggleDarkMode()"
                     title="Toggle dark mode">🌙</button>
@@ -23,9 +26,39 @@
                 <input placeholder="Who's the current GOAT? Who fell off? Who's a fraud?" id="character-search-val"
                     onkeyup="handleSearch(event)">
             </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>Use LLM for query modification</span>
+                    <label class="switch">
+                        <input type="checkbox" id="llm-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>Use SVD for comment retrieval</span>
+                    <label class="switch">
+                        <input type="checkbox" id="svd-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
 
             <!-- Suggested Inputs Section -->
             <div id="suggestions-container" class="suggestions-container">
+                <div class="intro-section">
+                    <h2><img src="/assets/farmer-hat.png" alt="Straw Hat" class="intro-logo" /> Welcome to The Streets
+                    </h2>
+                    <p class="intro-text">
+                        Curious what the community really thinks about your favorite character?
+                        Search any One Piece character to discover their reputation score, community consensus, and what
+                        people are actually saying about them on r/PirateFolk.
+                    </p>
+                    <p class="intro-subtext">
+                        💡 <strong>How it works:</strong> Search for a character name or ask a question like "who's the
+                        strongest?" to see detailed community analysis including sentiment trends over time and real
+                        comments from fans.
+                    </p>
+                </div>
                 <p class="suggestions-title">Try these searches:</p>
                 <div class="suggestions-grid">
                     <button class="suggestion-btn" onclick="searchSuggestion('biggest coward')">biggest coward</button>
@@ -71,16 +104,47 @@
                 <div class="stat-card">
                     <div class="stat-icon">⭐</div>
                     <div class="stat-content">
-                        <div class="stat-label">Reputation Score</div>
-                        <div class="stat-value" id="grid-rating">9.2</div>
+                        <div class="stat-label-container">
+                            <span class="stat-label">Reputation Score</span>
+                            <div class="info-tooltip">
+                                <span class="info-icon" title="Learn more">?</span>
+                                <div class="tooltip-content">
+                                    <strong>Reputation Score (0-10)</strong>
+                                    <p>A numerical rating based on sentiment analysis of community comments. Higher
+                                        scores indicate more positive reception.</p>
+                                    <p><strong>Range:</strong> 0 (Very Negative) to 10 (Extremely Positive)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="grid-rating" style="cursor: pointer;"
+                            onclick="showReputationExplanation()">9.2</div>
+                        <div class="score-explanation" id="reputation-explanation"
+                            style="display: none; font-size: 12px; margin-top: 6px; color: var(--text-secondary); font-weight: normal; font-family: 'Open Sans', sans-serif;">
+                        </div>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon">💬</div>
                     <div class="stat-content">
-                        <div class="stat-label">Community Consensus</div>
-                        <div class="stat-value" id="grid-sentiment">Very Positive</div>
+                        <div class="stat-label-container">
+                            <span class="stat-label">Community Consensus</span>
+                            <div class="info-tooltip">
+                                <span class="info-icon" title="Learn more">?</span>
+                                <div class="tooltip-content">
+                                    <strong>Community Consensus</strong>
+                                    <p>Describes the overall sentiment of community discussions, derived from comment
+                                        analysis.</p>
+                                    <p><strong>Range:</strong> Very Negative → Negative → Mixed → Positive → Very
+                                        Positive</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="grid-sentiment" style="cursor: pointer;"
+                            onclick="showConsensusExplanation()">Very Positive</div>
+                        <div class="score-explanation" id="consensus-explanation"
+                            style="display: none; font-size: 12px; margin-top: 6px; color: var(--text-secondary); font-weight: normal; font-family: 'Open Sans', sans-serif;">
+                        </div>
                     </div>
                 </div>
 
@@ -97,8 +161,11 @@
             <div class="full-width-sections">
                 <!-- Graph Section -->
                 <div class="graph-section">
-                    <h3>📈 Popularity Trend</h3>
-                    <p class="graph-context">This is a chart showing how positively or negatively <span id="chart-character-name">character</span> has been viewed over time in the r/PirateFolk community.</p>
+                    <h3>📈 Sentiment Trend Over Time</h3>
+                    <p class="graph-context">This chart tracks how the community's sentiment toward <span
+                            id="chart-character-name">character</span> has evolved. The line shows the reputation score
+                        (0-10 scale) based on community comments over time on r/PirateFolk. Higher points indicate more
+                        positive sentiment, while dips suggest periods of criticism or debate.</p>
                     <div
                         style="position: relative; height: 300px; width: 100%; background-color: #f5f5f5; border-radius: 4px;">
                         <canvas id="ratingsChart"></canvas>
@@ -110,7 +177,8 @@
                     <div class="evidence-header">
                         <div>
                             <h3>💬 Community Evidence</h3>
-                            <p class="section-subtitle">This is what people have been saying about "<span id="query-topic">character</span>" in r/PirateFolk</p>
+                            <p class="section-subtitle">This is what people have been saying about "<span
+                                    id="query-topic">character</span>" in r/PirateFolk</p>
                         </div>
                         <div class="filter-toggle">
                             <label for="filter-switch">Filter sensitive content</label>
@@ -144,6 +212,112 @@
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        // Generate LLM-powered character summary
+        async function generateCharacterSummary(characterName, characterData) {
+            try {
+                const response = await fetch('/character-summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        character: characterName,
+                        reputation_score: characterData.currentRating,
+                        consensus: characterData.sentiment,
+                        total_comments: characterData.total_comments,
+                        top_comments: characterData.comments.slice(0, 3)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.summary || characterData.summary;
+            } catch (err) {
+                console.error('Failed to generate LLM summary:', err);
+                throw err;
+            }
+        }
+
+        // Store current character name for explanations
+        let currentCharacterName = '';
+
+        // Show LLM-generated reputation explanation
+        async function showReputationExplanation() {
+            const scoreElement = document.getElementById('grid-rating');
+            const explanationElement = document.getElementById('reputation-explanation');
+
+            if (!scoreElement || !explanationElement) return;
+
+            const score = parseFloat(scoreElement.textContent);
+
+            // Toggle display
+            if (explanationElement.style.display !== 'none') {
+                explanationElement.style.display = 'none';
+                return;
+            }
+
+            explanationElement.textContent = 'Loading explanation...';
+            explanationElement.style.display = 'block';
+
+            try {
+                const response = await fetch('/reputation-explanation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        score: score,
+                        character: currentCharacterName
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                explanationElement.textContent = data.explanation || 'Could not generate explanation.';
+            } catch (err) {
+                console.error('Failed to get reputation explanation:', err);
+                explanationElement.textContent = 'Could not load explanation. Try again later.';
+            }
+        }
+
+        // Show LLM-generated consensus explanation
+        async function showConsensusExplanation() {
+            const consensusElement = document.getElementById('grid-sentiment');
+            const explanationElement = document.getElementById('consensus-explanation');
+
+            if (!consensusElement || !explanationElement) return;
+
+            const consensus = consensusElement.textContent.trim();
+
+            // Toggle display
+            if (explanationElement.style.display !== 'none') {
+                explanationElement.style.display = 'none';
+                return;
+            }
+
+            explanationElement.textContent = 'Loading explanation...';
+            explanationElement.style.display = 'block';
+
+            try {
+                const response = await fetch('/consensus-explanation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        consensus: consensus,
+                        character: currentCharacterName
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                explanationElement.textContent = data.explanation || 'Could not generate explanation.';
+            } catch (err) {
+                console.error('Failed to get consensus explanation:', err);
+                explanationElement.textContent = 'Could not load explanation. Try again later.';
+            }
         }
 
         // List of sensitive words to filter
@@ -348,6 +522,9 @@
             }
         }
 
+        // Calls search route with raw query, which returns closest matching character along with
+        // their relevant comments.
+        // Then, calls displayCharacterResults with character and comments to display on page.
         function performSearch(query) {
             const trimmedQuery = query.toLowerCase().trim();
             console.log(`performSearch called with query: "${trimmedQuery}"`);
@@ -355,7 +532,15 @@
                 document.getElementById('results-container').style.display = 'none';
                 return;
             }
-            fetch(`/search?q=${encodeURIComponent(trimmedQuery)}`)
+            const useLLM = document.getElementById('llm-toggle').checked
+            const useSVD = document.getElementById('svd-toggle').checked
+            let endpoint = useLLM
+                ? `/chat?q=${encodeURIComponent(trimmedQuery)}`
+                : `/search?q=${encodeURIComponent(trimmedQuery)}`;
+            endpoint += `&use_svd=${useSVD}`;
+            // pass useSVD as arg to route
+
+            fetch(endpoint)
                 .then(res => res.json())
                 .then(data => {
                     console.log('Full response data:', data);
@@ -371,7 +556,11 @@
                 });
         }
 
-        function displayCharacterResults(characterKey, query, retrievedComments, related) {
+        // Calls csearch route with the matched character,
+        // which returns all the character data needed to display on the page (including image_url)
+        // (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved, image_url)
+        // Then, display this data on the page.
+        function displayCharacterResults(characterKey, query, retrievedComments) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
             }
@@ -396,9 +585,28 @@
                     const heroRank = document.getElementById('hero-rank');
                     const heroSummary = document.getElementById('hero-summary');
 
+                    currentCharacterName = characterKey;
                     if (heroName) heroName.textContent = characterKey
                     if (heroRank) heroRank.textContent = character.rank;
-                    if (heroSummary) heroSummary.textContent = character.summary;
+
+                    // Hide previous explanations
+                    const reputationExp = document.getElementById('reputation-explanation');
+                    const consensusExp = document.getElementById('consensus-explanation');
+                    if (reputationExp) reputationExp.style.display = 'none';
+                    if (consensusExp) consensusExp.style.display = 'none';
+
+                    // Try to generate LLM summary if available, otherwise use default
+                    if (heroSummary) {
+                        heroSummary.textContent = "Loading summary...";
+                        generateCharacterSummary(characterKey, character)
+                            .then(llmSummary => {
+                                if (heroSummary) heroSummary.textContent = llmSummary;
+                            })
+                            .catch(err => {
+                                console.log("LLM summary unavailable, using default:", err);
+                                if (heroSummary) heroSummary.textContent = character.summary;
+                            });
+                    }
 
                     // Update character image
                     const artworkPlaceholder = document.getElementById('artwork-placeholder');
@@ -500,21 +708,38 @@
                     chartInstance.destroy();
                 }
 
-                const ratingData = character.ratings_over_time.map(d => ({
-                    date: new Date(d.date * 1000),
-                    rating: d.rating,
-                    sentiment: d.sentiment
-                }));
-                const maxRating = Math.max(...ratingData.map(d => d.rating)); // finds max rating to determine
-                // y-axis scale
-                console.log(`Creating chart for ${character.name} with ${ratingData.length} data points`);
+                // Handle empty or missing ratings data
+                if (!character.ratings_over_time || character.ratings_over_time.length === 0) {
+                    console.warn(`No ratings data for ${character.name}, using empty chart`);
+                    chartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: { labels: [], datasets: [{ label: 'Reputation Score', data: [] }] },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                    return;
+                }
+
+                const ratingData = character.ratings_over_time
+                    .filter(d => d && d.date && d.rating !== null && d.rating !== undefined)
+                    .map(d => ({
+                        date: new Date(d.date * 1000),
+                        rating: Math.max(0, Math.min(10, parseFloat(d.rating))), // Clamp to 0-10
+                        sentiment: d.sentiment
+                    }));
+
+                if (ratingData.length === 0) {
+                    console.warn(`No valid rating data points for ${character.name}`);
+                    return;
+                }
+
+                console.log(`Creating chart for ${character.name} with ${ratingData.length} data points`, ratingData);
 
                 chartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: ratingData.map(d => d.date.toLocaleDateString()),
                         datasets: [{
-                            label: 'Ratings',
+                            label: 'Reputation Score',
                             data: ratingData.map(d => d.rating),
                             borderColor: '#4285F4',
                             backgroundColor: 'rgba(66, 133, 244, 0.1)',
@@ -525,7 +750,10 @@
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2,
                             pointRadius: 6,
-                            pointHoverRadius: 8
+                            pointHoverRadius: 8,
+                            segment: {
+                                borderColor: '#4285F4'
+                            }
                         }]
                     },
                     options: {
@@ -535,29 +763,71 @@
                             legend: {
                                 display: true,
                                 labels: {
-                                    font: { size: 14 },
-                                    usePointStyle: true
+                                    font: { size: 14, family: "'Open Sans', sans-serif" },
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    color: 'var(--text-primary)'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                borderColor: '#4285F4',
+                                borderWidth: 1,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function (context) {
+                                        return 'Score: ' + context.parsed.y.toFixed(2) + '/10';
+                                    }
                                 }
                             }
                         },
                         scales: {
                             y: {
-                                beginAtZero: false,
+                                beginAtZero: true,
                                 min: 0,
-                                max: maxRating + 10,
+                                max: 10,
+                                title: {
+                                    display: true,
+                                    text: 'Reputation Score (0-10)',
+                                    font: { size: 13, weight: 'bold', family: "'Open Sans', sans-serif" },
+                                    color: 'var(--text-primary)',
+                                    padding: 12
+                                },
                                 ticks: {
-                                    font: { size: 12 }
+                                    font: { size: 12, family: "'Open Sans', sans-serif" },
+                                    color: 'var(--text-secondary)',
+                                    stepSize: 2
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)',
+                                    drawBorder: true
                                 }
                             },
                             x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date',
+                                    font: { size: 13, weight: 'bold', family: "'Open Sans', sans-serif" },
+                                    color: 'var(--text-primary)',
+                                    padding: 12
+                                },
                                 ticks: {
-                                    font: { size: 12 }
+                                    font: { size: 12, family: "'Open Sans', sans-serif" },
+                                    color: 'var(--text-secondary)',
+                                    maxRotation: 45,
+                                    minRotation: 0
+                                },
+                                grid: {
+                                    display: false
                                 }
                             }
                         }
                     }
                 });
-                console.log('Chart created successfully');
+                console.log('Chart created successfully for ' + character.name);
             } catch (error) {
                 console.error('Error creating chart:', error);
             }
@@ -579,8 +849,11 @@
                     <div class="comment-meta">
                         <span class="relevance-score">Score: ${(comment.score * 100).toFixed(0)}%</span>
                         <span class="timestamp">${comment.timestamp}</span>
+                        <span class="comment-link" onclick="window.open('${comment.permalink}', '_blank')">View
+                            source</span>
                     </div>
                 `;
+                
                 commentContainer.appendChild(commentEl);
             });
         }
@@ -601,9 +874,28 @@
                 if (filterLabel) filterLabel.textContent = 'OFF';
 
                 retrievedContainer.innerHTML = '';
-                console.log(`Clearing retrieved container and adding ${retrievedComments.length} comments`);
 
-                retrievedComments.forEach((comment, index) => {
+                // Filter out comments with 0 relevance, sort by relevance (highest first) and recency (most recent first), then take top 10
+                const relevantComments = retrievedComments
+                    .filter(comment => comment.sim_score > 0)
+                    .sort((a, b) => {
+                        // Primary sort: by relevance (descending)
+                        if (b.sim_score !== a.sim_score) {
+                            return b.sim_score - a.sim_score;
+                        }
+                        // Secondary sort: by timestamp (descending - most recent first)
+                        return (b.timestamp || 0) - (a.timestamp || 0);
+                    })
+                    .slice(0, 10);
+
+                console.log(`Filtering comments: ${retrievedComments.length} total → ${retrievedComments.filter(c => c.sim_score > 0).length} relevant → Top 10 by relevance & recency`);
+
+                if (relevantComments.length === 0) {
+                    retrievedContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No relevant comments found for this query.</p>';
+                    return;
+                }
+
+                relevantComments.forEach((comment, index) => {
                     const commentEl = document.createElement('div');
                     commentEl.className = `retrieved-comment ${comment.sentiment}`;
                     const displayText = censorText(comment.text);
@@ -624,16 +916,18 @@
                     footerDiv.className = 'retrieved-footer';
                     footerDiv.innerHTML = `
                         <span class="relevance-score">Relevance: ${(comment.sim_score * 100).toFixed(0)}%</span>
+                        <span class="comment-link" onclick="window.open('${comment.permalink}', '_blank')">View
+                            source</span>
                     `;
 
                     commentEl.appendChild(headerDiv);
                     commentEl.appendChild(textP);
                     commentEl.appendChild(footerDiv);
                     retrievedContainer.appendChild(commentEl);
-                    console.log(`Added comment ${index + 1}: ${comment.user}`);
+                    console.log(`#${index + 1} - ${comment.user} (relevance: ${(comment.sim_score * 100).toFixed(0)}%)`);
                 });
 
-                console.log(`Successfully added all ${character.retrieved.length} comments for ${character.name}`);
+                console.log(`Successfully added ${relevantComments.length} relevant comments for ${character.name}`);
 
 
             } catch (error) {
@@ -662,6 +956,14 @@
                     currentCharacterIndex = (currentCharacterIndex + 1) % characterKeys.length;
                     displayCharacterResults(characterKeys[currentCharacterIndex], 'browse');
                 });
+            }
+
+
+            if (comment.permalink) {
+                commentEl.style.cursor = 'pointer';
+                commentEl.addEventListener('click', () => {
+                    window.open(comment.permalink, '_blank')
+                })
             }
         });
     </script>

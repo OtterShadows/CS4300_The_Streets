@@ -5,7 +5,8 @@
 #sentiments are an enum of positive, negative, neutral
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
-from . import character_counts
+from language_processing import character_counts
+# import character_counts
 
 try:
     nltk.data.find('sentiment/vader_lexicon.zip')
@@ -26,9 +27,11 @@ def slander_glaze_sentiment(names_and_variants, text):
                 return "positive"
 def get_sentiment(text):
     # Check for slander/glaze sentiment first
-    glaze_sentiment = slander_glaze_sentiment(character_counts.names_and_variants, text)
-    if glaze_sentiment:
-        return glaze_sentiment
+    # TODO: Commented out until we can figure out a system that does not pit every popular character
+    # to ratings like -4000. need to weight the negative name modifications much less somehow.
+    # glaze_sentiment = slander_glaze_sentiment(character_counts.names_and_variants, text)
+    # if glaze_sentiment:
+    #     return glaze_sentiment
     score = sia.polarity_scores(text)["compound"]
     
     if score > 0.05:

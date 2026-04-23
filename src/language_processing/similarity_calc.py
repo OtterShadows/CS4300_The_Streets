@@ -12,14 +12,15 @@ from rapidfuzz.distance import Levenshtein
 from scipy.sparse.linalg import svds
 
 
-
+reverse_postings_filename = "reverse_postings_(well).csv"
+piratefolk_comments_filename = "piratefolk_comments_(v2).csv"
 
 # try referencing csv files by joining path names
 current_dir = os.path.dirname(os.path.abspath(__file__)) #the path where similarity_calc.py lives
-rp_path = os.path.join(current_dir, "csv", "new_reverse_postings.csv") # get inverted index info
+rp_path = os.path.join(current_dir, "csv", reverse_postings_filename) # get inverted index info
 rp = pd.read_csv(rp_path)
 
-pfc_path = os.path.join(current_dir, "csv", "new_pf_comments.csv")
+pfc_path = os.path.join(current_dir, "csv", piratefolk_comments_filename)
 pfc = pd.read_csv(pfc_path) # comments with ids, texts, and other fields
     # ohhh it's short for pirate folk comments
 
@@ -429,14 +430,16 @@ def query_character(query: str, vectorizer: TfidfVectorizer, tfidf_matrix, chara
 
     
 
+model_path = os.path.join(current_dir, "data", "model.pkl")
+
 def make_pickle():
     joblib.dump({
     "matrix": tfidf_matrix,
     "vectorizer": vectorizer,
     "characters": characters
-}, "src/language_processing/data/model.pkl")
+}, model_path)
     
-#make_pickle()
+# make_pickle()
 
 
 
@@ -514,6 +517,9 @@ def filter_comments_for_character(official_name, comment_ids):
 
 
 # context: still want to show other comments, but at top of list show comments that reference character
+# TODO: WITH HOW THE PROJECT IS NOW IMPLEMENTED, IT NO LONGER MAKES SENSE
+# TO USE THIS FUNCTION, SINCE ALL COMMENTS RETURNED SHOULD MENTION THE
+# RETRIEVED CHARACTER
 # input:
 #       - offficial character name
 #       - comments: list of comments, each a tuple of (comment_id, sim_score)
@@ -536,7 +542,7 @@ def prioritize_comments_by_character(official_name, comment_ids):
 # Code below is for creating the comment_term_tfidf_matrix, to be used for retrieving relevant comments
 # print("\033[92m Start create_comment_term_tfidf_matrix \033[0m")
 (comment_ids, comment_term_vectorizer, comment_term_tfidf_matrix, texts) = \
-create_comment_term_tfidf_matrix(pfc_path)
+    create_comment_term_tfidf_matrix(pfc_path)
 # print("\033[92m End create_comment_term_tfidf_matrix \033[0m")
 
 
