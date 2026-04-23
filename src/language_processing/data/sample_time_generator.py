@@ -41,8 +41,8 @@ def get_jsons(list_timestamps):
     for timestamp in list_timestamps:
         link = f"https://api.pullpush.io/reddit/search/comment/?subreddit=piratefolk&size=100&before={timestamp}"
         link_content = requests.get(link).content
-        path = "src/language_processing/data/new_comments_data/2025"
-        json = open(f'src/language_processing/data/new_comments_data/2025/comments_{timestamp}.json', 'wb').write(link_content)
+        path = "src/language_processing/data/pf_expansion_3"
+        json = open(f'{path}/comments_{timestamp}.json', 'wb').write(link_content)
         print(f"Retrieved json for timestamp {timestamp}, number {i}/{len(list_timestamps)}")
         i = i + 1
     
@@ -52,8 +52,8 @@ def get_jsons(list_timestamps):
 
 # start = current_unix_timestamp - (4 * year)
 # end = current_unix_timestamp
-start = year_2025
-end = year_2026 - 1
-get_jsons(list_timestamps(start, end, week / 2))
+start = 1701129600
+end = year_2024 - 1
+get_jsons(list_timestamps(start, end, day * 2))
 
 
