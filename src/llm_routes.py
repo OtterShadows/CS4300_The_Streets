@@ -111,8 +111,8 @@ def register_chat_route(app, json_search=None):
         if not json_search:
             return jsonify({"error": "Search functionality not available"}), 503
             
-        data = request.get_json() or {}
-        user_message = (data.get("message") or "").strip()
+        data = request.get_json(silent=True) or {}
+        user_message = (data.get("message") or request.args.get("q") or "").strip()
         if not user_message:
             return jsonify({"error": "Message is required"}), 400
 
