@@ -262,7 +262,7 @@ names_and_variants = {
     "Shyarly": ["Sharley", "Shirley"],
     "Wadatsumi": [],
     "Big Pan": ["Big Bun"],
-    "Eustass Kid": ["Kid", "Eustass Kidd", "Useless Captain Mid","Captain Mid"], 
+    "Eustass Kid": ["Kid", "Kidd", "Eustass Kidd", "Useless Captain Mid","Captain Mid"], 
     "Killer": [],
     "Apoo": [],
     "Hawkins": [],
