@@ -3,23 +3,130 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='character-search-new.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+<link
+    href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&family=Pirata+One&family=Crimson+Text:ital@0;1&display=swap"
     rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 
 <body>
+    <!-- Floating Pirate Ship -->
+    <div class="pirate-ship-container">
+        <svg class="pirate-ship" viewBox="0 0 250 140" width="180" height="105">
+            <defs>
+                <linearGradient id="wood" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#8B4513" />
+                    <stop offset="100%" style="stop-color:#654321" />
+                </linearGradient>
+                <linearGradient id="sailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#F5DEB3" />
+                    <stop offset="100%" style="stop-color:#D2B48C" />
+                </linearGradient>
+            </defs>
+            <!-- Hull -->
+            <path d="M 40 80 Q 60 92 125 92 Q 190 92 210 80 L 205 105 Q 125 115 45 105 Z" fill="url(#wood)"
+                stroke="#3D2817" stroke-width="2" />
+            <!-- Deck -->
+            <rect x="40" y="78" width="170" height="4" fill="#8B7355" stroke="#5D4E37" stroke-width="1" />
+            <!-- Deck railing -->
+            <line x1="50" y1="78" x2="50" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="70" y1="78" x2="70" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="90" y1="78" x2="90" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="110" y1="78" x2="110" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="130" y1="78" x2="130" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="150" y1="78" x2="150" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="170" y1="78" x2="170" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="190" y1="78" x2="190" y2="72" stroke="#654321" stroke-width="1" />
+            <line x1="48" y1="72" x2="192" y2="72" stroke="#654321" stroke-width="1" />
+
+            <!-- Main Mast -->
+            <line x1="125" y1="78" x2="125" y2="8" stroke="#8B4513" stroke-width="4" />
+            <!-- Main Sail -->
+            <path d="M 125 18 L 95 75 L 155 75 Z" fill="url(#sailGrad)" stroke="#8B4513" stroke-width="1"
+                opacity="0.85" />
+            <!-- Rigging lines from main mast -->
+            <line x1="125" y1="18" x2="95" y2="75" stroke="#D3D3D3" stroke-width="1" opacity="0.6" />
+            <line x1="125" y1="18" x2="155" y2="75" stroke="#D3D3D3" stroke-width="1" opacity="0.6" />
+            <line x1="125" y1="30" x2="85" y2="75" stroke="#D3D3D3" stroke-width="0.8" opacity="0.5" />
+            <line x1="125" y1="30" x2="165" y2="75" stroke="#D3D3D3" stroke-width="0.8" opacity="0.5" />
+
+            <!-- Back Mast (Mizzen) -->
+            <line x1="180" y1="78" x2="180" y2="20" stroke="#8B4513" stroke-width="3" />
+            <!-- Back Sail -->
+            <path d="M 180 30 L 160 75 L 195 75 Z" fill="#D2B48C" stroke="#8B4513" stroke-width="1" opacity="0.75" />
+            <!-- Rigging for back mast -->
+            <line x1="180" y1="30" x2="160" y2="75" stroke="#D3D3D3" stroke-width="1" opacity="0.5" />
+            <line x1="180" y1="30" x2="195" y2="75" stroke="#D3D3D3" stroke-width="1" opacity="0.5" />
+
+            <!-- Cannon Ports -->
+            <circle cx="65" cy="85" r="2.5" fill="#2D2D2D" stroke="#5D4E37" stroke-width="0.5" />
+            <circle cx="95" cy="87" r="2.5" fill="#2D2D2D" stroke="#5D4E37" stroke-width="0.5" />
+            <circle cx="125" cy="88" r="2.5" fill="#2D2D2D" stroke="#5D4E37" stroke-width="0.5" />
+            <circle cx="155" cy="87" r="2.5" fill="#2D2D2D" stroke="#5D4E37" stroke-width="0.5" />
+            <circle cx="185" cy="85" r="2.5" fill="#2D2D2D" stroke="#5D4E37" stroke-width="0.5" />
+
+            <!-- Windows/Portholes -->
+            <circle cx="110" cy="82" r="2" fill="#FFD700" opacity="0.7" />
+            <circle cx="140" cy="83" r="2" fill="#FFD700" opacity="0.7" />
+
+            <!-- Flag Pole (main mast) -->
+            <line x1="125" y1="8" x2="145" y2="8" stroke="#654321" stroke-width="2" />
+            <!-- Pirate Flag -->
+            <rect x="145" y="3" width="30" height="24" fill="#1a1a1e" stroke="#ffd700" stroke-width="1" />
+            <!-- Skull: -->
+            <circle cx="152" cy="13" r="3" fill="#ffd700" />
+            <rect x="158" y="11" width="6" height="4" fill="#ffd700" />
+            <!-- Crossbones -->
+            <line x1="150" y1="18" x2="165" y2="18" stroke="#ffd700" stroke-width="1" />
+            <circle cx="150" cy="18" r="1.5" fill="#ffd700" />
+            <circle cx="165" cy="18" r="1.5" fill="#ffd700" />
+
+            <!-- Crew silhouettes -->
+            <circle cx="75" cy="75" r="1.5" fill="#3D3D3D" />
+            <circle cx="115" cy="76" r="1.5" fill="#3D3D3D" />
+            <circle cx="160" cy="75" r="1.5" fill="#3D3D3D" />
+        </svg>
+    </div>
     <div class="full-body-container character-search-layout">
         <!-- Header -->
         <div class="search-header">
             <div class="header-top">
                 <div class="header-branding">
                     <div class="branding-with-logo">
-                        <img src="/assets/farmer-hat.png" alt="Straw Hat" class="logo-image" />
+                        <svg class="logo-image" viewBox="0 0 120 80" width="36" height="24">
+                            <defs>
+                                <linearGradient id="strawGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#D2B48C" />
+                                    <stop offset="100%" style="stop-color:#8B7355" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Straw hat -->
+                            <ellipse cx="60" cy="35" rx="45" ry="25" fill="url(#strawGrad)" stroke="#6B5345"
+                                stroke-width="1.5" />
+                            <!-- Hat brim detail -->
+                            <path d="M 15 35 Q 60 45 105 35" fill="none" stroke="#6B5345" stroke-width="1"
+                                opacity="0.5" />
+                            <!-- Crown -->
+                            <path d="M 35 35 L 40 15 L 50 12 L 60 10 L 70 12 L 80 15 L 85 35" fill="url(#strawGrad)"
+                                stroke="#6B5345" stroke-width="1.5" />
+                            <!-- Red band -->
+                            <rect x="30" y="38" width="60" height="6" fill="#c41e3a" opacity="0.8" />
+                            <!-- Shine -->
+                            <ellipse cx="50" cy="20" rx="12" ry="5" fill="#F5DEB3" opacity="0.4" />
+                        </svg>
                         <h1>The Streets</h1>
                     </div>
                 </div>
                 <button id="dark-mode-toggle" class="dark-mode-btn" onclick="toggleDarkMode()"
-                    title="Toggle dark mode">🌙</button>
+                    title="Toggle dark mode"><svg viewBox="0 0 100 100" width="24" height="24">
+                        <circle cx="50" cy="50" r="35" fill="#FFD700" opacity="0.8" />
+                        <circle cx="50" cy="50" r="30" fill="none" stroke="#FFD700" stroke-width="2" />
+                        <path d="M 50 15 L 50 35" stroke="#FFD700" stroke-width="2" stroke-linecap="round" />
+                        <path d="M 85 50 L 65 50" stroke="#FFD700" stroke-width="2" stroke-linecap="round" />
+                        <path d="M 50 85 L 50 65" stroke="#FFD700" stroke-width="2" stroke-linecap="round" />
+                        <path d="M 15 50 L 35 50" stroke="#FFD700" stroke-width="2" stroke-linecap="round" />
+                        <path d="M 72 28 L 60 40" stroke="#FFD700" stroke-width="2" stroke-linecap="round" />
+                        <path d="M 72 72 L 60 60" stroke="#FFD700" stroke-width="2" stroke-linecap="round" />
+                    </svg></button>
             </div>
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
@@ -30,7 +137,29 @@
             <!-- Suggested Inputs Section -->
             <div id="suggestions-container" class="suggestions-container">
                 <div class="intro-section">
-                    <h2><img src="/assets/farmer-hat.png" alt="Straw Hat" class="intro-logo" /> Welcome to The Streets
+                    <h2 class="streets-title">
+                        <svg class="intro-logo" viewBox="0 0 120 80" width="45" height="30">
+                            <defs>
+                                <linearGradient id="strawGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#D2B48C" />
+                                    <stop offset="100%" style="stop-color:#8B7355" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Straw hat -->
+                            <ellipse cx="60" cy="35" rx="45" ry="25" fill="url(#strawGrad)" stroke="#6B5345"
+                                stroke-width="1.5" />
+                            <!-- Hat brim detail -->
+                            <path d="M 15 35 Q 60 45 105 35" fill="none" stroke="#6B5345" stroke-width="1"
+                                opacity="0.5" />
+                            <!-- Crown -->
+                            <path d="M 35 35 L 40 15 L 50 12 L 60 10 L 70 12 L 80 15 L 85 35" fill="url(#strawGrad)"
+                                stroke="#6B5345" stroke-width="1.5" />
+                            <!-- Red band -->
+                            <rect x="30" y="38" width="60" height="6" fill="#c41e3a" opacity="0.8" />
+                            <!-- Shine -->
+                            <ellipse cx="50" cy="20" rx="12" ry="5" fill="#F5DEB3" opacity="0.4" />
+                        </svg>
+                        The Streets
                     </h2>
                     <p class="intro-text">
                         Curious what the community really thinks about your favorite character?
@@ -38,18 +167,24 @@
                         people are actually saying about them on r/PirateFolk.
                     </p>
                     <p class="intro-subtext">
-                        💡 <strong>How it works:</strong> Search for a character name or ask a question like "who's the
+                        <svg viewBox="0 0 24 24" width="16" height="16"
+                            style="display: inline-block; margin-right: 4px; vertical-align: middle;">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="#FFD700" stroke-width="2" />
+                            <path d="M 12 5 L 12 12 M 12 12 L 16 16" stroke="#FFD700" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg> <strong>How it works:</strong> Search for a character name or ask a question like "who's
+                        the
                         strongest?" to see detailed community analysis including sentiment trends over time and real
                         comments from fans.
                     </p>
                 </div>
                 <p class="suggestions-title">Try these searches:</p>
                 <div class="suggestions-grid">
-                    <button class="suggestion-btn" onclick="searchSuggestion('biggest coward')">biggest coward</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('Luffy Katakuri fight')">Luffy Katakuri
-                        fight</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the goat?')">Who's the
-                        goat?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Who fell off?')">Who fell off?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the worst?')">Who's the
+                        worst?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Luffy')">Luffy</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('bravest')">bravest</button>
                 </div>
             </div>
         </div>
@@ -58,17 +193,28 @@
         <div id="results-container" style="display: none;" class="results-container">
 
             <!-- Hero Character Card -->
-            <div class="hero-card">
+            <div class="hero-card bounty-poster">
                 <!-- Navigation Arrows -->
                 <button class="nav-arrow prev-arrow" id="prev-char">‹</button>
                 <button class="nav-arrow next-arrow" id="next-char">›</button>
 
                 <div class="hero-content">
                     <div class="hero-info">
-                        <div class="hero-label">Top Result for Your Query</div>
+                        <div class="hero-label wanted-stamp"><svg viewBox="0 0 24 24" width="20" height="20"
+                                style="display: inline-block; margin-right: 4px; vertical-align: middle;">
+                                <line x1="4" y1="4" x2="20" y2="20" stroke="#c41e3a" stroke-width="2.5"
+                                    stroke-linecap="round" />
+                                <line x1="20" y1="4" x2="4" y2="20" stroke="#c41e3a" stroke-width="2.5"
+                                    stroke-linecap="round" />
+                            </svg> WANTED <svg viewBox="0 0 24 24" width="20" height="20"
+                                style="display: inline-block; margin-left: 4px; vertical-align: middle;">
+                                <line x1="4" y1="4" x2="20" y2="20" stroke="#c41e3a" stroke-width="2.5"
+                                    stroke-linecap="round" />
+                                <line x1="20" y1="4" x2="4" y2="20" stroke="#c41e3a" stroke-width="2.5"
+                                    stroke-linecap="round" />
+                            </svg></div>
                         <h1 id="hero-name">-</h1>
                         <div class="hero-description" id="hero-summary">-</div>
-                        <button class="read-more-btn" onclick="expandSummary()">Related Info</button>
                     </div>
                     <div class="hero-artwork">
                         <div class="artwork-placeholder" id="artwork-placeholder">
@@ -79,58 +225,85 @@
             </div>
 
             <!-- Stats Grid Section -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">⭐</div>
+            <div class="stats-grid streets-analysis">
+                <div class="stat-card bounty-stat" onclick="showReputationExplanation()" style="position: relative;">
+                    <div class="stat-icon bounty-icon"><svg viewBox="0 0 100 100" width="32" height="32">
+                            <rect x="20" y="30" width="60" height="50" fill="#D2B48C" stroke="#8B7355" stroke-width="2"
+                                rx="4" />
+                            <rect x="25" y="40" width="50" height="8" fill="#8B7355" opacity="0.5" />
+                            <circle cx="40" cy="58" r="5" fill="none" stroke="#8B7355" stroke-width="1.5" />
+                            <circle cx="60" cy="58" r="5" fill="none" stroke="#8B7355" stroke-width="1.5" />
+                            <path d="M 35 28 Q 50 15 65 28" fill="#8B7355" />
+                        </svg></div>
                     <div class="stat-content">
                         <div class="stat-label-container">
-                            <span class="stat-label">Reputation Score</span>
+                            <span class="stat-label bounty-label">BOUNTY</span>
                             <div class="info-tooltip">
-                                <span class="info-icon" title="Learn more">?</span>
+                                <span class="info-icon" title="Click to see LLM Analysis">?</span>
                                 <div class="tooltip-content">
                                     <strong>Reputation Score (0-10)</strong>
-                                    <p>A numerical rating based on sentiment analysis of community comments. Higher
-                                        scores indicate more positive reception.</p>
+                                    <p>Based on sentiment analysis of community comments. Click the bounty to see AI
+                                        insights!</p>
                                     <p><strong>Range:</strong> 0 (Very Negative) to 10 (Extremely Positive)</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="stat-value" id="grid-rating" style="cursor: pointer;"
-                            onclick="showReputationExplanation()">9.2</div>
+                        <div class="stat-value" id="grid-rating">9.2</div>
                         <div class="score-explanation" id="reputation-explanation"
                             style="display: none; font-size: 12px; margin-top: 6px; color: var(--text-secondary); font-weight: normal; font-family: 'Open Sans', sans-serif;">
                         </div>
                     </div>
+                    <div class="click-indicator"><svg viewBox="0 0 24 24" width="14" height="14"
+                            style="display: inline-block; margin-right: 4px; vertical-align: middle;">
+                            <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M 14 14 L 20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg> ANALYZE</div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">💬</div>
+                <div class="stat-card consensus-stat" onclick="showConsensusExplanation()" style="position: relative;">
+                    <div class="stat-icon consensus-icon"><svg viewBox="0 0 100 100" width="32" height="32">
+                            <path d="M 30 40 Q 50 20 70 40" fill="none" stroke="#FFD700" stroke-width="3"
+                                stroke-linecap="round" />
+                            <path d="M 25 50 L 75 50" fill="none" stroke="#FFD700" stroke-width="2" />
+                            <path d="M 35 60 L 65 60" fill="none" stroke="#FFD700" stroke-width="2" />
+                            <path d="M 40 70 L 60 70" fill="none" stroke="#FFD700" stroke-width="2" />
+                        </svg></div>
                     <div class="stat-content">
                         <div class="stat-label-container">
-                            <span class="stat-label">Community Consensus</span>
+                            <span class="stat-label consensus-label">STREETS SAY</span>
                             <div class="info-tooltip">
-                                <span class="info-icon" title="Learn more">?</span>
+                                <span class="info-icon" title="Click to see LLM Analysis">?</span>
                                 <div class="tooltip-content">
                                     <strong>Community Consensus</strong>
-                                    <p>Describes the overall sentiment of community discussions, derived from comment
-                                        analysis.</p>
+                                    <p>Overall sentiment from the community. Click to hear what the streets think!</p>
                                     <p><strong>Range:</strong> Very Negative → Negative → Mixed → Positive → Very
                                         Positive</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="stat-value" id="grid-sentiment" style="cursor: pointer;"
-                            onclick="showConsensusExplanation()">Very Positive</div>
+                        <div class="stat-value" id="grid-sentiment">Very Positive</div>
                         <div class="score-explanation" id="consensus-explanation"
                             style="display: none; font-size: 12px; margin-top: 6px; color: var(--text-secondary); font-weight: normal; font-family: 'Open Sans', sans-serif;">
                         </div>
                     </div>
+                    <div class="click-indicator"><svg viewBox="0 0 24 24" width="14" height="14"
+                            style="display: inline-block; margin-right: 4px; vertical-align: middle;">
+                            <circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M 14 14 L 20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg> ANALYZE</div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
+                <div class="stat-card mentions-stat">
+                    <div class="stat-icon mentions-icon"><svg viewBox="0 0 100 100" width="32" height="32">
+                            <ellipse cx="50" cy="70" rx="25" ry="18" fill="#8B7355" stroke="#5D4E37"
+                                stroke-width="1.5" />
+                            <path d="M 35 40 Q 50 25 65 40 Q 65 55 50 60 Q 35 55 35 40" fill="#8B7355" stroke="#5D4E37"
+                                stroke-width="1.5" />
+                            <circle cx="40" cy="35" r="3" fill="#FFD700" opacity="0.7" />
+                            <circle cx="55" cy="32" r="3" fill="#FFD700" opacity="0.7" />
+                        </svg></div>
                     <div class="stat-content">
-                        <div class="stat-label">Mentions</div>
+                        <div class="stat-label mentions-label">DEN DEN CHATS</div>
                         <div class="stat-value" id="grid-comments">1.2K</div>
                     </div>
                 </div>
@@ -140,24 +313,37 @@
             <div class="full-width-sections">
                 <!-- Graph Section -->
                 <div class="graph-section">
-                    <h3>📈 Sentiment Trend Over Time</h3>
+                    <h3><svg viewBox="0 0 24 24" width="24" height="24"
+                            style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                            <polyline points="2,20 5,10 8,15 12,5 16,15 19,8 22,20" fill="none" stroke="#FFD700"
+                                stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+                            <line x1="2" y1="20" x2="22" y2="20" stroke="#FFD700" stroke-width="2" />
+                        </svg>Sentiment Trend Over Time</h3>
                     <p class="graph-context">This chart tracks how the community's sentiment toward <span
                             id="chart-character-name">character</span> has evolved. The line shows the reputation score
                         (0-10 scale) based on community comments over time on r/PirateFolk. Higher points indicate more
                         positive sentiment, while dips suggest periods of criticism or debate.</p>
                     <div
-                        style="position: relative; height: 300px; width: 100%; background-color: #f5f5f5; border-radius: 4px;">
+                        style="position: relative; height: 300px; width: 100%; background: linear-gradient(135deg, #1a1a1e 0%, #2d2d33 100%); border-radius: 4px; border: 1px solid #4a4a52;">
                         <canvas id="ratingsChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Evidence Section -->
-                <div class="evidence-section">
+                <div class="evidence-section den-den-section">
                     <div class="evidence-header">
                         <div>
-                            <h3>💬 Community Evidence</h3>
-                            <p class="section-subtitle">This is what people have been saying about "<span
-                                    id="query-topic">character</span>" in r/PirateFolk</p>
+                            <h3 class="den-den-title"><svg viewBox="0 0 100 100" width="28" height="28"
+                                    style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                    <ellipse cx="50" cy="70" rx="25" ry="18" fill="#87ceeb" stroke="#5D4E37"
+                                        stroke-width="1.5" />
+                                    <path d="M 35 40 Q 50 25 65 40 Q 65 55 50 60 Q 35 55 35 40" fill="#87ceeb"
+                                        stroke="#5D4E37" stroke-width="1.5" />
+                                    <circle cx="40" cy="35" r="3" fill="#FFD700" opacity="0.8" />
+                                    <circle cx="55" cy="32" r="3" fill="#FFD700" opacity="0.8" />
+                                </svg> Den Den Mushi Messages</h3>
+                            <p class="section-subtitle streets-subtitle">What the Grand Line is saying about "<span
+                                    id="query-topic">character</span>" on r/PirateFolk</p>
                         </div>
                         <div class="filter-toggle">
                             <label for="filter-switch">Filter sensitive content</label>
@@ -308,23 +494,38 @@
 
         // Dark mode functionality
         function initDarkMode() {
-            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            const isDarkMode = localStorage.getItem('darkMode') !== 'false';
             if (isDarkMode) {
                 document.body.classList.add('dark-mode');
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('darkMode', 'true');
                 updateDarkModeButton(true);
+            } else {
+                document.body.classList.add('light-mode');
+                document.body.classList.remove('dark-mode');
+                updateDarkModeButton(false);
             }
         }
 
         function toggleDarkMode() {
-            const isDarkMode = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDarkMode);
-            updateDarkModeButton(isDarkMode);
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            if (isDarkMode) {
+                document.body.classList.remove('dark-mode');
+                document.body.classList.add('light-mode');
+                localStorage.setItem('darkMode', 'false');
+                updateDarkModeButton(false);
+            } else {
+                document.body.classList.remove('light-mode');
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'true');
+                updateDarkModeButton(true);
+            }
         }
 
         function updateDarkModeButton(isDarkMode) {
             const btn = document.getElementById('dark-mode-toggle');
             if (btn) {
-                btn.textContent = isDarkMode ? '☀️' : '🌙';
+                // SVG icon works for both modes, no need to change
             }
         }
 
@@ -573,10 +774,42 @@
 
                     // Update character image
                     const artworkPlaceholder = document.getElementById('artwork-placeholder');
-                    if (artworkPlaceholder && character.image_url) {
-                        artworkPlaceholder.style.backgroundImage = `url('${character.image_url}')`;
-                        artworkPlaceholder.style.backgroundSize = 'cover';
-                        artworkPlaceholder.style.backgroundPosition = 'center';
+                    if (artworkPlaceholder) {
+                        if (character.image_url) {
+                            artworkPlaceholder.style.backgroundImage = `url('${character.image_url}')`;
+                            artworkPlaceholder.style.backgroundSize = 'contain';
+                            artworkPlaceholder.style.backgroundPosition = 'center';
+                            artworkPlaceholder.innerHTML = '<div class="rank-badge" id="hero-rank">GOAT</div>';
+                        } else {
+                            // Show placeholder graphic when no image available
+                            artworkPlaceholder.style.backgroundImage = 'none';
+                            artworkPlaceholder.innerHTML = `
+                                <svg viewBox="0 0 300 380" width="280" height="420" style="opacity: 0.6;">
+                                    <!-- Character silhouette placeholder -->
+                                    <defs>
+                                        <linearGradient id="placeholderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#87ceeb;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#1a1a1e;stop-opacity:0.2" />
+                                        </linearGradient>
+                                    </defs>
+                                    <!-- Head -->
+                                    <circle cx="150" cy="70" r="35" fill="url(#placeholderGrad)" stroke="#87ceeb" stroke-width="2" />
+                                    <!-- Body -->
+                                    <rect x="120" y="105" width="60" height="80" rx="8" fill="url(#placeholderGrad)" stroke="#87ceeb" stroke-width="2" />
+                                    <!-- Left arm -->
+                                    <path d="M 120 120 Q 80 130 70 170" stroke="#87ceeb" stroke-width="8" fill="none" stroke-linecap="round" />
+                                    <!-- Right arm -->
+                                    <path d="M 180 120 Q 220 130 230 170" stroke="#87ceeb" stroke-width="8" fill="none" stroke-linecap="round" />
+                                    <!-- Left leg -->
+                                    <path d="M 130 185 L 120 270" stroke="#87ceeb" stroke-width="8" fill="none" stroke-linecap="round" />
+                                    <!-- Right leg -->
+                                    <path d="M 170 185 L 180 270" stroke="#87ceeb" stroke-width="8" fill="none" stroke-linecap="round" />
+                                    <!-- Question mark -->
+                                    <text x="150" y="360" font-size="80" fill="#87ceeb" opacity="0.4" text-anchor="middle" font-family="Pirata One, cursive">?</text>
+                                </svg>
+                                <div class="rank-badge" id="hero-rank">GOAT</div>
+                            `;
+                        }
                     }
 
                     // Update stats grid
@@ -671,18 +904,18 @@
                         datasets: [{
                             label: 'Reputation Score',
                             data: ratingData.map(d => d.rating),
-                            borderColor: '#4285F4',
-                            backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                            borderColor: '#ffd700',
+                            backgroundColor: 'rgba(212, 175, 55, 0.15)',
                             borderWidth: 3,
                             fill: true,
                             tension: 0.4,
-                            pointBackgroundColor: '#4285F4',
-                            pointBorderColor: '#fff',
+                            pointBackgroundColor: '#ffd700',
+                            pointBorderColor: '#1a1a1e',
                             pointBorderWidth: 2,
                             pointRadius: 6,
                             pointHoverRadius: 8,
                             segment: {
-                                borderColor: '#4285F4'
+                                borderColor: '#ffd700'
                             }
                         }]
                     },
@@ -696,15 +929,15 @@
                                     font: { size: 14, family: "'Open Sans', sans-serif" },
                                     usePointStyle: true,
                                     padding: 15,
-                                    color: 'var(--text-primary)'
+                                    color: '#f0f0f0'
                                 }
                             },
                             tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
                                 padding: 12,
                                 titleFont: { size: 13, weight: 'bold' },
                                 bodyFont: { size: 12 },
-                                borderColor: '#4285F4',
+                                borderColor: '#ffd700',
                                 borderWidth: 1,
                                 displayColors: true,
                                 callbacks: {
@@ -732,7 +965,7 @@
                                     stepSize: 2
                                 },
                                 grid: {
-                                    color: 'rgba(0, 0, 0, 0.08)',
+                                    color: 'rgba(212, 175, 55, 0.1)',
                                     drawBorder: true
                                 }
                             },

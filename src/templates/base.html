@@ -3,7 +3,10 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&family=Pirata+One&family=Crimson+Text:ital@0;1&display=swap"
+    rel="stylesheet">
+
 <body>
     <div class="full-body-container">
         <div class="top-text">
@@ -15,7 +18,8 @@
             </div>
             <div class="input-box" onclick="sendFocus()">
                 <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for a Keeping up with the Kardashians episode" id="filter-text-val" onkeyup="filterText()">
+                <input placeholder="Search for a Keeping up with the Kardashians episode" id="filter-text-val"
+                    onkeyup="filterText()">
             </div>
         </div>
         <div id="answer-box"></div>
