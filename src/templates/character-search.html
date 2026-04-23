@@ -133,6 +133,22 @@
                 <input placeholder="Who's the current GOAT? Who fell off? Who's a fraud?" id="character-search-val"
                     onkeyup="handleSearch(event)">
             </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>Use LLM for query modification</span>
+                    <label class="switch">
+                        <input type="checkbox" id="llm-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>Use SVD for comment retrieval</span>
+                    <label class="switch">
+                        <input type="checkbox" id="svd-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
 
             <!-- Suggested Inputs Section -->
             <div id="suggestions-container" class="suggestions-container">
@@ -702,6 +718,9 @@
             }
         }
 
+        // Calls search route with raw query, which returns closest matching character along with
+        // their relevant comments.
+        // Then, calls displayCharacterResults with character and comments to display on page.
         function performSearch(query) {
             const trimmedQuery = query.toLowerCase().trim();
             console.log(`performSearch called with query: "${trimmedQuery}"`);
@@ -709,7 +728,15 @@
                 document.getElementById('results-container').style.display = 'none';
                 return;
             }
-            fetch(`/search?q=${encodeURIComponent(trimmedQuery)}`)
+            const useLLM = document.getElementById('llm-toggle').checked
+            const useSVD = document.getElementById('svd-toggle').checked
+            let endpoint = useLLM
+                ? `/chat?q=${encodeURIComponent(trimmedQuery)}`
+                : `/search?q=${encodeURIComponent(trimmedQuery)}`;
+            endpoint += `&use_svd=${useSVD}`;
+            // pass useSVD as arg to route
+
+            fetch(endpoint)
                 .then(res => res.json())
                 .then(data => {
                     console.log('Full response data:', data);
@@ -724,6 +751,10 @@
                 });
         }
 
+        // Calls csearch route with the matched character,
+        // which returns all the character data needed to display on the page (including image_url)
+        // (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved, image_url)
+        // Then, display this data on the page.
         function displayCharacterResults(characterKey, query, retrievedComments) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
@@ -1012,8 +1043,11 @@
                     <div class="comment-meta">
                         <span class="relevance-score">Score: ${(comment.score * 100).toFixed(0)}%</span>
                         <span class="timestamp">${comment.timestamp}</span>
+                        <span class="comment-link" onclick="window.open('${comment.permalink}', '_blank')">View
+                            source</span>
                     </div>
                 `;
+                
                 commentContainer.appendChild(commentEl);
             });
         }
@@ -1076,6 +1110,8 @@
                     footerDiv.className = 'retrieved-footer';
                     footerDiv.innerHTML = `
                         <span class="relevance-score">Relevance: ${(comment.sim_score * 100).toFixed(0)}%</span>
+                        <span class="comment-link" onclick="window.open('${comment.permalink}', '_blank')">View
+                            source</span>
                     `;
 
                     commentEl.appendChild(headerDiv);
@@ -1114,6 +1150,14 @@
                     currentCharacterIndex = (currentCharacterIndex + 1) % characterKeys.length;
                     displayCharacterResults(characterKeys[currentCharacterIndex], 'browse');
                 });
+            }
+
+
+            if (comment.permalink) {
+                commentEl.style.cursor = 'pointer';
+                commentEl.addEventListener('click', () => {
+                    window.open(comment.permalink, '_blank')
+                })
             }
         });
     </script>

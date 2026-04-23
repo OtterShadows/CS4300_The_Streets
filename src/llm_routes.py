@@ -42,17 +42,77 @@ def llm_search_decision(client, user_message):
         return True, "Kardashian"
     return False, None
 
+# Use the LLM to modify the query to hopefully yield better IR system results.
+# Input: LLM client, user query
+# Output: 
+#   - return_character: (TRUE if the IR should display a character for the results, FALSE o/w)
+#   - content: modified query
+def llm_modify_query(client, user_message):
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are an assistant to help rewrite user queries to improve search results "
+                "from an information retrieval system. "
+                ""
+                "Background:"
+                "The IR system uses comments from subreddit r/Piratefolk, a forum in which fans of "
+                "mange/anime series One Piece make jokes and discuss the plot, writing, and most "
+                "importantly for our purposes, the characters. They often push certain 'agendas' for "
+                "the characters they support or dislike. For example, they may comment, 'Luffy is the GOAT' "
+                "or 'Luffy low diffs Arlong."
+                "The IR system calculates all of the comments belonging to (i.e. mentioning) each character, "
+                "and given a user query, compares the similarity of the query to the aggregated comments of "
+                "each character, return the most similar character, and return the most similar comments to the query "
+                "that mention that character. "
+                ""
+                "You must modify the given user query to one that would more accurately match relevant comments of r/Piratefolk. "
+                "Example 1: 'Who is the most liked' character should be transformed to something like "
+                "'is the GOAT. is the best character. i like. low diffs. neg diffs. carries.', etc. with similar comments "
+                "that would match with how people talk in discussions of that character."
+                ""
+                "Example 2: 'Most bum character' -> 'bum. useless. overrated.' etc. "
+                ""
+                "Example 3: 'Who is the goat of wano?' -> 'wano country arc. goat. carries. carried. strongest. powerful.' "
+                ""
+                "Always include lots of synonyms (also including slang) in order to cast a wide net for retrieving comments."
+                ""
+                "IMPORTANT: If the user query seems like it is seeking some information for which a character would "
+                "be a proper answer, like the examples above, begin your response with YES followed by one space and the "
+                "modified query. If instead returning a character wouldn't make sense for the query, (e.g query is "
+                "'luffy katakuri fight', where the user probably just wants to see comments discussing the fight) "
+                "return NO_CHARACTER followed by one space and the modified query."
+            )
+        },
+        {"role": "user", "content": user_message},
+    ]
+    # TODO:
+    #   1. Have not implemented handling of YES/NO whether a character should be returned
+    #   2. Right now, too many synonyms are generated, seems to actually be messing results up a little bit.
+    print("Calculating LLM response for query modification...")
+    response = client.chat(messages)
+    print("Finished calculating LLM response for query modification...")
+    content = (response.get("content") or "").strip().upper()
+    print(f"Content: {content}")
+    logger.info(f"LLM search decision: {content}")
+    if re.search(r"\bNO_CHARACTER\b", content):
+        return_character = False
+    else:
+        return_character = True
+    return return_character, content
+ 
+
 
 def register_chat_route(app, json_search=None):
     """Register the /chat SSE endpoint and /character-summary endpoint. Called from routes.py."""
 
-    @app.route("/chat", methods=["POST"])
+    @app.route("/chat", methods=["GET"])
     def chat():
         if not json_search:
             return jsonify({"error": "Search functionality not available"}), 503
             
-        data = request.get_json() or {}
-        user_message = (data.get("message") or "").strip()
+        data = request.get_json(silent=True) or {}
+        user_message = (data.get("message") or request.args.get("q") or "").strip()
         if not user_message:
             return jsonify({"error": "Message is required"}), 400
 
@@ -61,34 +121,46 @@ def register_chat_route(app, json_search=None):
             return jsonify({"error": "SPARK_API_KEY not set — add it to your .env file"}), 500
 
         client = LLMClient(api_key=api_key)
-        use_search, search_term = llm_search_decision(client, user_message)
+        return_character, modified_query = llm_modify_query(client, user_message)
+        print(f"Return character?: {return_character}")
+        print(f"Modified query: {modified_query}\n")
+        # return_character: TRUE if a character should be displayed for the results 
+        use_svd = request.args.get("use_svd", "false").lower() == "true"
+        character_and_comments_json = json.loads(json_search(modified_query, use_svd))
+        return character_and_comments_json
 
-        if use_search:
-            episodes = json.loads(json_search(search_term or "Kardashian"))
-            context_text = "\n\n---\n\n".join(
-                f"Title: {ep['title']}\nDescription: {ep['descr']}\nIMDB Rating: {ep['imdb_rating']}"
-                for ep in episodes
-            ) or "No matching episodes found."
-            messages = [
-                {"role": "system", "content": "Answer questions about Keeping Up with the Kardashians using only the episode information provided."},
-                {"role": "user", "content": f"Episode information:\n\n{context_text}\n\nUser question: {user_message}"},
-            ]
-        else:
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant for Keeping Up with the Kardashians questions."},
-                {"role": "user", "content": user_message},
-            ]
+        # TODO: Code below is from the template. For generating a natural language answer for the user, I believe.
+        # This would be Maureen's task to adapt for our project.
+        # Note for later: this code below was assuming the "methods" for this route was "POST" not "GET"...
+        # I'm not entirely sure how this affects this code, but it's likely whoever implements
+        # the chat summarizing will have to create a new route (with method POST) specifically for
+        # the LLM interpreting the character/comments that the IR system returned
 
-        def generate():
-            if use_search and search_term:
-                yield f"data: {json.dumps({'search_term': search_term})}\n\n"
-            try:
-                for chunk in client.chat(messages, stream=True):
-                    if chunk.get("content"):
-                        yield f"data: {json.dumps({'content': chunk['content']})}\n\n"
-            except Exception as e:
-                logger.error(f"Streaming error: {e}")
-                yield f"data: {json.dumps({'error': 'Streaming error occurred'})}\n\n"
+        # if use_search:
+        #     context_text = "\n\n---\n\n".join(
+        #         f"Title: {ep['title']}\nDescription: {ep['descr']}\nIMDB Rating: {ep['imdb_rating']}"
+        #         for ep in episodes
+        #     ) or "No matching episodes found."
+        #     messages = [
+        #         {"role": "system", "content": "Answer questions about Keeping Up with the Kardashians using only the episode information provided."},
+        #         {"role": "user", "content": f"Episode information:\n\n{context_text}\n\nUser question: {user_message}"},
+        #     ]
+        # else:
+        #     messages = [
+        #         {"role": "system", "content": "You are a helpful assistant for Keeping Up with the Kardashians questions."},
+        #         {"role": "user", "content": user_message},
+        #     ]
+
+        # def generate():
+        #     if use_search and search_term:
+        #         yield f"data: {json.dumps({'search_term': modified_query})}\n\n"
+        #     try:
+        #         for chunk in client.chat(messages, stream=True):
+        #             if chunk.get("content"):
+        #                 yield f"data: {json.dumps({'content': chunk['content']})}\n\n"
+        #     except Exception as e:
+        #         logger.error(f"Streaming error: {e}")
+        #         yield f"data: {json.dumps({'error': 'Streaming error occurred'})}\n\n"
 
         return Response(
             # Stream the response to the client ("stream_with_context" is from Flask)

@@ -7,6 +7,9 @@ import re
 import joblib 
 # from src.language_processing import similarity_calc
 
+piratefolk_comments_filename = "piratefolk_comments_(v2).csv"
+reverse_postings_filename = "reverse_postings_(well).csv"
+
 #To speed up multiple calls of the functions.
 comment_cache = {}
 # comments is a csv with columns id, timestamp, score, controversiality, text
@@ -18,7 +21,7 @@ def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     comments_df = pd.read_csv(
-        os.path.join(current_dir, "csv", "new_pf_comments.csv")
+        os.path.join(current_dir, "csv", piratefolk_comments_filename)
     ).set_index("id")
 
     def is_valid(text):
@@ -28,7 +31,7 @@ def load_data():
     comments_df = comments_df[comments_df["text"].apply(is_valid)]
 
     postings_df = pd.read_csv(
-        os.path.join(current_dir, "csv", "new_reverse_postings.csv")
+        os.path.join(current_dir, "csv", reverse_postings_filename)
     ).drop_duplicates(subset="character").set_index("character")
 
     valid_ids = set(comments_df.index)
@@ -49,7 +52,7 @@ class Rating:
 
 
 class Comment:
-   def __init__(self, user, text, sentiment, rating=None, score=None, timestamp=None, controversiality=None, sim_score=None):
+   def __init__(self, user, text, sentiment, rating=None, score=None, timestamp=None, controversiality=None, sim_score=None, permalink=None):
         self.user = user
         self.text = text
         self.sentiment = sentiment
@@ -59,15 +62,16 @@ class Comment:
         self.timestamp = timestamp
         self.controversiality = controversiality
         self.sim_score = sim_score
+        self.permalink = permalink
 
 
 # new version of get_comment to account for similarity score
 def create_comment(id, sim_score, comments_df):
     if id in comment_cache:
-        print(f"Cache hit for comment ID {id}")
+        # print(f"Cache hit for comment ID {id}")
         return comment_cache[id]
     if id not in comments_df.index:
-        print(f"Comment ID {id} not found in comments_df")
+        # print(f"Comment ID {id} not found in comments_df")
         return None
     row = comments_df.loc[id]
     if isinstance(row, pd.DataFrame):
@@ -78,6 +82,7 @@ def create_comment(id, sim_score, comments_df):
         user = row["author"] if pd.notna(row["author"]) else "Anonymous"
     except (KeyError, TypeError):
         user = "Anonymous"
+    link = "https://www.reddit.com" + row["permalink"]
     comment = Comment(
         user=user,
         text=text,
@@ -86,7 +91,8 @@ def create_comment(id, sim_score, comments_df):
         score=float(row["score"]),
         sim_score=sim_score,
         timestamp=float(row["timestamp"]),
-        controversiality=int(row["controversiality"])
+        controversiality=int(row["controversiality"]),
+        permalink=link
     )
 
     comment_cache[id] = comment
@@ -165,6 +171,7 @@ def create_character(name, postings_df, comments_df):
     comment_list = [ c for c in
         (create_comment(cid, 0, comments_df) for cid in comment_ids) if c is not None
     ]
+
     ratings_over_time = get_rating_over_time(name, postings_df, comments_df)
     pos = sum(1 for c in comment_list if c.sentiment == "positive")
     neg = sum(1 for c in comment_list if c.sentiment == "negative")
@@ -238,13 +245,18 @@ def characters_to_dict(characters):
             # "ratings_over_time": [(r.date.timestamp(), r.rating) for r in character.ratings_over_time],
             "ratings_over_time": [{"date": r.date.timestamp(), "rating": normalize_score_to_10(r.rating), "sentiment": r.sentiment} for r in character.ratings_over_time],
             #comments as a list of dicts
-            "comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality} for c in character.comments],
+            "comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "permalink": c.permalink} for c in character.comments],
             #retrieved as a list of dicts
-            "retrieved": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality} for c in character.retrieved]
+            "retrieved": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "permalink": c.permalink} for c in character.retrieved]
         }
     return char_dict
 # print(create_all_characters())
-# comments_df, postings_df = load_data()
-# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), "language_processing/data/character_data.pkl")
+comments_df, postings_df = load_data()
+current_dir = os.path.dirname(os.path.abspath(__file__))
+character_data_filename = "character_data.pkl"
+character_data_filepath = os.path.join(current_dir, "data", character_data_filename)
+# print("Creating new character_data.pkl")
+# joblib.dump(characters_to_dict(create_all_characters(postings_df, comments_df)), character_data_filepath)
+# print("Created new character_data.pkl")
 
 
