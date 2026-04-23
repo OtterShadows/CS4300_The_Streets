@@ -589,8 +589,8 @@ def write_reverse_postings_alias_to_csv(reverse_postings, filename="src/language
 
 
 
-
-
+list_of_well_official = ['Kizaru', 'Shanks', 'Rob Lucci', 'Dracule Mihawk', 'Roronoa Zoro', 'Kaku', 'Monkey D. Luffy', 'Kaidou', 'Smoker', 'Sanji', 'Nico Robin', 'Monkey D. Dragon', 'Nefertari Vivi', 'Yamato', 'Donquixote Doflamingo', 'Marshall D. Teach', 'Fujitora', 'Boa Hancock', 'Akainu', 'Garp', 'Franky', 'Sabo', 'King', 'Edward Newgate', 'Rocks D. Xebec', 'Jaguar D. Saul', 'Trafalgar D. Water Law', 'Aokiji', 'Nami', 'Portgas D. Ace', 'Crocodile', 'Koby', 'Imu', 'Eustass Kid', 'Usopp', 'Brook', 'Jack', 'Jinbe', 'Marco', 'Silvers Rayleigh', 'Jozu', 'Sengoku', 'Enel', 'Killer', 'Buggy', 'Bartholomew Kuma', 'Tony Tony Chopper', 'Arlong', 'Gecko Moria', 'Dorry', 'Charlotte Katakuri', 'Queen', 'Carrot', 'Hack']
+names_and_variants_well = {key: value for key, value in names_and_variants.items() if key in list_of_well_official}
 
 
 
@@ -738,3 +738,4 @@ filtered_characters = get_well_characters_from_cc(input_cc_full_path)
     filtered_characters
     )
 """
+# list_of_well_official = ['Kizaru', 'Shanks', 'Rob Lucci', 'Dracule Mihawk', 'Roronoa Zoro', 'Kaku', 'Monkey D. Luffy', 'Kaidou', 'Smoker', 'Sanji', 'Nico Robin', 'Monkey D. Dragon', 'Nefertari Vivi', 'Yamato', 'Donquixote Doflamingo', 'Marshall D. Teach', 'Fujitora', 'Boa Hancock', 'Akainu', 'Garp', 'Franky', 'Sabo', 'King', 'Edward Newgate', 'Rocks D. Xebec', 'Jaguar D. Saul', 'Trafalgar D. Water Law', 'Aokiji', 'Nami', 'Portgas D. Ace', 'Crocodile', 'Koby', 'Imu', 'Eustass Kid', 'Usopp', 'Brook', 'Jack', 'Jinbe', 'Marco', 'Silvers Rayleigh', 'Jozu', 'Sengoku', 'Enel', 'Killer', 'Buggy', 'Bartholomew Kuma', 'Tony Tony Chopper', 'Arlong', 'Gecko Moria', 'Dorry', 'Charlotte Katakuri', 'Queen', 'Carrot', 'Hack']
