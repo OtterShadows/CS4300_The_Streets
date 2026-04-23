@@ -45,7 +45,7 @@ plt.xlabel("Singular value number")
 plt.ylabel("Singular value")
 plt.show()"""
 
-docs_compressed, s, words_compressed = svds(td_matrix, k=45)
+docs_compressed, s, words_compressed = svds(td_matrix, k=25)
 words_compressed = words_compressed.transpose()
 word_to_index = vectorizer.vocabulary_       
 index_to_word = {i:t for t,i in word_to_index.items()}
@@ -60,7 +60,7 @@ def make_pickle():
     "s": s,
     "svd_docs_compressed": docs_compressed_normed
 }, "src/language_processing/data/svd_model.pkl")
-    
+# make_pickle()
 
 def closest_docs_to_query(query_vec_in, k = 5):
     sims = docs_compressed_normed.dot(query_vec_in)
@@ -83,12 +83,19 @@ def closest_doc_to_query(query):
     top_dims = [int(dim) for dim in top_dims_indices]
     print("({}, {}, {:.4f}, Top dimensions: {}) ".format(i, proj, sim, top_dims))"""
 
-# make_pickle()
+
 
     
 
+#retrieve top words for each dimension in the svd matrix
 
-
+def top_words_for_dimension(words_compressed_in):
+    for i in range(25):
+        print("Top words in dimension", i)
+        dimension_col = words_compressed[:,i].squeeze()
+        asort = np.argsort(-dimension_col)
+        print([index_to_word[i] for i in asort[:15]])
+        print()
 
 # context: appropriate the SVD model made for character docs for retrieval/ranking of comments,
 # hopefully ones that match the meaning of the query better...
@@ -140,3 +147,4 @@ def closest_words(word_in, words_representation_in, k = 10):
 # query =" potential man"
 # query_tfidf = vectorizer.transform([query]).toarray()
 # query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
+top_words_for_dimension(words_compressed)

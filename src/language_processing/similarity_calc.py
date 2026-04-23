@@ -396,7 +396,8 @@ def create_character_tfidf(character_docs: dict[str, str]):
     characters = list(character_docs.keys())
     docs = list(character_docs.values())
 
-    vectorizer = TfidfVectorizer(stop_words="english")
+    vectorizer = TfidfVectorizer(stop_words="english",  max_df=0.8, 
+    min_df=5)
     tfidf_matrix = vectorizer.fit_transform(docs)
 
     return characters, vectorizer, tfidf_matrix
