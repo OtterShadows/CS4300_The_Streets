@@ -137,14 +137,14 @@
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span>Use LLM for query modification</span>
                     <label class="switch">
-                        <input type="checkbox" id="llm-toggle">
+                        <input type="checkbox" id="llm-toggle" checked>
                         <span class="slider round"></span>
                     </label>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span>Use SVD for comment retrieval</span>
                     <label class="switch">
-                        <input type="checkbox" id="svd-toggle">
+                        <input type="checkbox" id="svd-toggle" checked>
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -232,7 +232,7 @@
                         <h1 id="hero-name">-</h1>
                         <div class="hero-description" id="hero-summary">-</div>
                         <div style="margin-top: 20px;" class="hero-subhead">Top Dimensions for Your Query</div>
-                        <div  class="hero-description" id="query-dimensions"></div>
+                        <div class="hero-description" id="query-dimensions"></div>
                         <div class="hero-subhead">Top Dimensions for Your Character</div>
                         <div class="hero-description" id="top-dimensions"></div>
                         <div class="hero-subhead">Related Characters</div>
@@ -245,7 +245,6 @@
                     </div>
                     <div class="hero-artwork">
                         <div class="artwork-placeholder" id="artwork-placeholder">
-                            <div class="rank-badge" id="hero-rank">GOAT</div>
                         </div>
                     </div>
                 </div>
@@ -796,7 +795,6 @@
 
                     currentCharacterName = characterKey;
                     if (heroName) heroName.textContent = characterKey
-                    if (heroRank) heroRank.textContent = character.rank;
 
                     // Hide previous explanations
                     const reputationExp = document.getElementById('reputation-explanation');
@@ -824,7 +822,6 @@
                             artworkPlaceholder.style.backgroundImage = `url('${character.image_url}')`;
                             artworkPlaceholder.style.backgroundSize = 'contain';
                             artworkPlaceholder.style.backgroundPosition = 'center';
-                            artworkPlaceholder.innerHTML = '<div class="rank-badge" id="hero-rank">GOAT</div>';
                         } else {
                             // Show placeholder graphic when no image available
                             artworkPlaceholder.style.backgroundImage = 'none';
@@ -852,7 +849,6 @@
                                     <!-- Question mark -->
                                     <text x="150" y="360" font-size="80" fill="#87ceeb" opacity="0.4" text-anchor="middle" font-family="Pirata One, cursive">?</text>
                                 </svg>
-                                <div class="rank-badge" id="hero-rank">GOAT</div>
                             `;
                         }
                     }
@@ -892,15 +888,15 @@
                     if (chartCharacterName) chartCharacterName.textContent = characterKey;
                     if (retrievedCount) retrievedCount.textContent = character.retrieved.length;
 
-                    if (butt0){
+                    if (butt0) {
                         butt0.textContent = relatedCharacters[0] || 'N/A';
                         butt0.onclick = relatedCharacters[0] ? () => searchSuggestion(relatedCharacters[0]) : null;
                     }
-                    if (butt1){
+                    if (butt1) {
                         butt1.textContent = relatedCharacters[1] || 'N/A';
                         butt1.onclick = relatedCharacters[1] ? () => searchSuggestion(relatedCharacters[1]) : null;
                     }
-                    if (butt2){
+                    if (butt2) {
                         butt2.textContent = relatedCharacters[2] || 'N/A';
                         butt2.onclick = relatedCharacters[2] ? () => searchSuggestion(relatedCharacters[2]) : null;
                     }
@@ -1081,7 +1077,7 @@
                             source</span>
                     </div>
                 `;
-                
+
                 commentContainer.appendChild(commentEl);
             });
         }
