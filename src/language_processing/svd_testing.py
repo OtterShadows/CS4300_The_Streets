@@ -62,10 +62,14 @@ def make_pickle():
 }, "src/language_processing/data/svd_model.pkl")
 # make_pickle()
 
-def closest_docs_to_query(query_vec_in, k = 5):
-    sims = docs_compressed_normed.dot(query_vec_in)
+def closest_docs_to_query(query):
+    print(f"DEBUG: Characters from model.pkl: {characters}")
+    k=5
+    query_tfidf = vectorizer.transform([query]).toarray()
+    query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
+    sims = docs_compressed_normed.dot(query_vec)
     asort = np.argsort(-sims)[:k+1]
-    return [(i, characters[i],sims[i]) for i in asort[1:]]
+    return [characters[i] for i in asort[1:]]
 
 def closest_doc_to_query(query):
     print(f"DEBUG: Characters from model.pkl: {characters}")

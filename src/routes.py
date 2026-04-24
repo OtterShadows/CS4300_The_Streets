@@ -88,17 +88,19 @@ svd_dimension_names = {
 def json_search(query, use_svd):
     if not query.strip():
         return json.dumps({"error": "empty query"})
-        
+    related = []
     # first check if the query matches a character name (with fuzzy matching)
     if character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well) != "":
         print(f"Using character_counts.fuzzy_match_character")
         result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well)
+        related = svd_testing.closest_docs_to_query(result)[1:4]
     # calculate the similarity of the query with the character "docs" and 
     # return the most similar character
     else:
         print(f"Using svd_testing.closest_doc_to_query")
         result = svd_testing.closest_doc_to_query(query)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
+        related = svd_testing.closest_docs_to_query(query)[1:4]
 
     
     if use_svd:
@@ -151,7 +153,8 @@ def json_search(query, use_svd):
         "character": result, # string of most similar character to query
         "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list],
         "top_dimensions": top_dim_names,
-        "query_dimensions": top_dim_names
+        "query_dimensions": top_dim_names,
+        "related_characters": related
     })
 
 
