@@ -85,6 +85,8 @@
                         <h1 id="hero-name">-</h1>
                         <div class="hero-description" id="hero-summary">-</div>
                         <button class="read-more-btn" onclick="expandSummary()">Related Info</button>
+                        <div style="margin-top: 20px;" class="hero-label">Top Dimensions for Your Query</div>
+                        <div  class="hero-description" id="query-dimensions"></div>
                         <div class="hero-label">Top Dimensions for Your Character</div>
                         <div class="hero-description" id="top-dimensions"></div>
                     </div>
@@ -544,8 +546,9 @@
                     const characterName = data.character || 'ERROR';
                     const retrievedComments = data.relevant_comments || 'ERROR';
                     const top_dims = data.top_dimensions || [];
+                    const qdims = data.query_dimensions || [];
                     console.log(`Best character match: "${characterName}"`);
-                    displayCharacterResults(characterName, trimmedQuery, retrievedComments, top_dims);
+                    displayCharacterResults(characterName, trimmedQuery, retrievedComments, top_dims, qdims);
                 })
                 .catch(err => {
                     console.log(`Error during search for "${characterName}":`, err);
@@ -557,7 +560,7 @@
         // which returns all the character data needed to display on the page (including image_url)
         // (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved, image_url)
         // Then, display this data on the page.
-        function displayCharacterResults(characterKey, query, retrievedComments, topDimensions) {
+        function displayCharacterResults(characterKey, query, retrievedComments, topDimensions, queryDimensions) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
             }
@@ -635,11 +638,13 @@
                     // Update query context (show what was searched)
                     const queryTerm = document.getElementById('query-term');
                     const queryTopic = document.getElementById('query-topic');
+                    const queryDimensionsEL = document.getElementById('query-dimensions');
                     const chartCharacterName = document.getElementById('chart-character-name');
                     const retrievedCount = document.getElementById('retrieved-count');
 
                     if (queryTerm) queryTerm.textContent = query;
                     if (queryTopic) queryTopic.textContent = query;
+                    if (queryDimensionsEL) queryDimensionsEL.textContent = queryDimensions.join(", ");
                     if (chartCharacterName) chartCharacterName.textContent = characterKey;
                     if (retrievedCount) retrievedCount.textContent = character.retrieved.length;
 

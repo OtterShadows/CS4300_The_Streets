@@ -139,11 +139,19 @@ def json_search(query, use_svd):
     top_dimensions = scores.argsort()[-3:][::-1]
     top_dim_names = [svd_dimension_names.get(d) for d in top_dimensions]
     print(f"Top dimensions for character '{result}': {top_dim_names}")
+    query_tfidf = vectorizer.transform([query]).toarray().squeeze()
 
+    # project into latent space
+    query_vec = query_tfidf @ svd_words_compressed
+
+    top_dims = query_vec.argsort()[::-1][:3]
+    top_dim_names = [svd_dimension_names.get(i) for i in top_dims]
+    print(f"Top dimensions for query '{query}': {top_dim_names}")
     return json.dumps({
         "character": result, # string of most similar character to query
         "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list],
-        "top_dimensions": top_dim_names
+        "top_dimensions": top_dim_names,
+        "query_dimensions": top_dim_names
     })
 
 
