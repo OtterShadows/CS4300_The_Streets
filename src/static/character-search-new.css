@@ -278,6 +278,13 @@ body.light-mode::before {
     width: 18px;
 }
 
+.related-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap; 
+    margin-top: 10px;
+}
+
 .input-box input {
     width: 100%;
     margin-left: 12px;
