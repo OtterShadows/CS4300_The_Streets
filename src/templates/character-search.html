@@ -645,20 +645,7 @@
 
                     //update top dimensions
                     const dimensionsContainer = document.getElementById('top-dimensions');
-                    if (dimensionsContainer) {
-                        dimensionsContainer.innerHTML = '';
-                        if (topDimensions.length > 0) {
-                            topDimensions.forEach(dim => {
-                                const dimEl = document.createElement('div');
-                                dimEl.className = 'dimension';
-                                dimEl.textContent = `${dim.name}: ${dim.value.toFixed(3)}`;
-                                dimensionsContainer.appendChild(dimEl);
-                            });
-                        } else {
-                            dimensionsContainer.textContent = 'No significant dimensions found.';
-                        }
-                    }
-
+                    dimensionsContainer.textContent = topDimensions.join(", ");
                     // Update chart
                     updateChart(character, query);
 

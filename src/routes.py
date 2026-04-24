@@ -65,7 +65,7 @@ def template_json_search(query):
 svd_dimension_names = {
     0: "Writing Scaling",
     1: "Related to the Yonko Saga",
-    2: "Present for Roof Piece",
+    2: "Related to Roof Piece",
     3: "Related to the WG",
     4: "Related to the Marines",
     5: "Devil Fruit Discussion",
@@ -138,6 +138,7 @@ def json_search(query, use_svd):
     scores = svd_words_compressed[char_idx]
     top_dimensions = scores.argsort()[-3:][::-1]
     top_dim_names = [svd_dimension_names.get(d) for d in top_dimensions]
+    print(f"Top dimensions for character '{result}': {top_dim_names}")
 
     return json.dumps({
         "character": result, # string of most similar character to query
