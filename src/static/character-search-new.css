@@ -278,6 +278,13 @@ body.light-mode::before {
     width: 18px;
 }
 
+.related-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap; 
+    margin-top: 10px;
+}
+
 .input-box input {
     width: 100%;
     margin-left: 12px;
@@ -373,6 +380,16 @@ body.light-mode::before {
     transform: rotate(-15deg);
     display: inline-block;
 }
+.hero-subhead {
+    font-family: 'Pirata One', cursive;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--pirate-red);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    display: inline-block;
+}
 
 .wanted-stamp {
     color: var(--pirate-red);
@@ -396,6 +413,7 @@ body.light-mode::before {
     line-height: 1.7;
     margin-bottom: 24px;
 }
+
 
 .read-more-btn {
     font-family: 'Montserrat', sans-serif;

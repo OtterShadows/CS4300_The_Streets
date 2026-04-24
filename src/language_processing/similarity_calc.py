@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 from sklearn.metrics.pairwise import cosine_similarity
 import joblib
 from datetime import datetime
@@ -396,7 +396,8 @@ def create_character_tfidf(character_docs: dict[str, str]):
     characters = list(character_docs.keys())
     docs = list(character_docs.values())
 
-    vectorizer = TfidfVectorizer(stop_words="english")
+    vectorizer = TfidfVectorizer(stop_words=list(ENGLISH_STOP_WORDS),  max_df=0.8, 
+    min_df=5)
     tfidf_matrix = vectorizer.fit_transform(docs)
 
     return characters, vectorizer, tfidf_matrix
@@ -439,7 +440,7 @@ def make_pickle():
     "characters": characters
 }, model_path)
     
-# make_pickle()
+#make_pickle()
 
 
 

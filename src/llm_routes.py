@@ -82,6 +82,7 @@ def llm_modify_query(client, user_message):
                 "modified query. If instead returning a character wouldn't make sense for the query, (e.g query is "
                 "'luffy katakuri fight', where the user probably just wants to see comments discussing the fight) "
                 "return NO_CHARACTER followed by one space and the modified query."
+                "IMPORTANT if you recieve a query that is just a character name, do not modify the query."
             )
         },
         {"role": "user", "content": user_message},

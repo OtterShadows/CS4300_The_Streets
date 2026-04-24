@@ -61,6 +61,25 @@ def template_json_search(query):
         })
     return json.dumps(matches)
 
+#giving names to each of the discovered svd dimensions
+svd_dimension_names = {
+    0: "Writing Scaling",
+    1: "Related to the Yonko Saga",
+    2: "Related to Roof Piece",
+    3: "Related to the WG",
+    4: "Related to the Marines",
+    5: "Devil Fruit Discussion",
+    6: "Theories and Speculation",
+    7: "Transformation Powers",
+    8: "Related to Major Arcs",
+    9: "Sword users (NOT swordsmen)",
+    10: "Swordsmen (Mihawk upscale btw)",
+    11: "Emotional Backstory",
+    12: "Related to Enies Lobby/Buster Calls",
+    13: "Important to the Final Saga",
+    14: "REAL Top Tiers"
+}
+
 # (Overwriting the above)
 # Context: placing the search performing logic in this helper for search route;
 # to mimic template's control flow going forward with the LLM integration
@@ -69,17 +88,19 @@ def template_json_search(query):
 def json_search(query, use_svd):
     if not query.strip():
         return json.dumps({"error": "empty query"})
-        
+    related = []
     # first check if the query matches a character name (with fuzzy matching)
     if character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well) != "":
         print(f"Using character_counts.fuzzy_match_character")
         result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well)
+        related = svd_testing.closest_docs_to_query(result)[1:4]
     # calculate the similarity of the query with the character "docs" and 
     # return the most similar character
     else:
         print(f"Using svd_testing.closest_doc_to_query")
         result = svd_testing.closest_doc_to_query(query)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
+        related = svd_testing.closest_docs_to_query(query)[1:4]
 
     
     if use_svd:
@@ -114,9 +135,26 @@ def json_search(query, use_svd):
             comment_list.append(c)
     print(f"DEBUG: Created {len(comment_list)} Comment objects.")
 
+    #return top dimensions for the character as well, for use in the frontend
+    char_idx = characters.index(result)
+    scores = svd_words_compressed[char_idx]
+    top_dimensions = scores.argsort()[-3:][::-1]
+    top_dim_names = [svd_dimension_names.get(d) for d in top_dimensions]
+    print(f"Top dimensions for character '{result}': {top_dim_names}")
+    query_tfidf = vectorizer.transform([query]).toarray().squeeze()
+
+    # project into latent space
+    query_vec = query_tfidf @ svd_words_compressed
+
+    top_dims = query_vec.argsort()[::-1][:3]
+    top_dim_names = [svd_dimension_names.get(i) for i in top_dims]
+    print(f"Top dimensions for query '{query}': {top_dim_names}")
     return json.dumps({
         "character": result, # string of most similar character to query
-        "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list]
+        "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list],
+        "top_dimensions": top_dim_names,
+        "query_dimensions": top_dim_names,
+        "related_characters": related
     })
 
 

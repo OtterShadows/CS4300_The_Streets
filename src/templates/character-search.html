@@ -137,14 +137,14 @@
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span>Use LLM for query modification</span>
                     <label class="switch">
-                        <input type="checkbox" id="llm-toggle">
+                        <input type="checkbox" id="llm-toggle" checked>
                         <span class="slider round"></span>
                     </label>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span>Use SVD for comment retrieval</span>
                     <label class="switch">
-                        <input type="checkbox" id="svd-toggle">
+                        <input type="checkbox" id="svd-toggle" checked>
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -231,10 +231,20 @@
                             </svg></div>
                         <h1 id="hero-name">-</h1>
                         <div class="hero-description" id="hero-summary">-</div>
+                        <div style="margin-top: 20px;" class="hero-subhead">Top Dimensions for Your Query</div>
+                        <div class="hero-description" id="query-dimensions"></div>
+                        <div class="hero-subhead">Top Dimensions for Your Character</div>
+                        <div class="hero-description" id="top-dimensions"></div>
+                        <div class="hero-subhead">Related Characters</div>
+                        <div class="related-buttons">
+                            <button class="read-more-btn" id="butt0"></button>
+                            <button class="read-more-btn" id="butt1"></button>
+                            <button class="read-more-btn" id="butt2"></button>
+                        </div>
+
                     </div>
                     <div class="hero-artwork">
                         <div class="artwork-placeholder" id="artwork-placeholder">
-                            <div class="rank-badge" id="hero-rank">GOAT</div>
                         </div>
                     </div>
                 </div>
@@ -742,8 +752,11 @@
                     console.log('Full response data:', data);
                     const characterName = data.character || 'ERROR';
                     const retrievedComments = data.relevant_comments || 'ERROR';
+                    const top_dims = data.top_dimensions || [];
+                    const qdims = data.query_dimensions || [];
+                    const relatedCharacters = data.related_characters || [];
                     console.log(`Best character match: "${characterName}"`);
-                    displayCharacterResults(characterName, trimmedQuery, retrievedComments);
+                    displayCharacterResults(characterName, trimmedQuery, retrievedComments, top_dims, qdims, relatedCharacters);
                 })
                 .catch(err => {
                     console.log(`Error during search for "${characterName}":`, err);
@@ -755,7 +768,7 @@
         // which returns all the character data needed to display on the page (including image_url)
         // (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved, image_url)
         // Then, display this data on the page.
-        function displayCharacterResults(characterKey, query, retrievedComments) {
+        function displayCharacterResults(characterKey, query, retrievedComments, topDimensions, queryDimensions, relatedCharacters) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
             }
@@ -782,7 +795,6 @@
 
                     currentCharacterName = characterKey;
                     if (heroName) heroName.textContent = characterKey
-                    if (heroRank) heroRank.textContent = character.rank;
 
                     // Hide previous explanations
                     const reputationExp = document.getElementById('reputation-explanation');
@@ -810,7 +822,6 @@
                             artworkPlaceholder.style.backgroundImage = `url('${character.image_url}')`;
                             artworkPlaceholder.style.backgroundSize = 'contain';
                             artworkPlaceholder.style.backgroundPosition = 'center';
-                            artworkPlaceholder.innerHTML = '<div class="rank-badge" id="hero-rank">GOAT</div>';
                         } else {
                             // Show placeholder graphic when no image available
                             artworkPlaceholder.style.backgroundImage = 'none';
@@ -838,7 +849,6 @@
                                     <!-- Question mark -->
                                     <text x="150" y="360" font-size="80" fill="#87ceeb" opacity="0.4" text-anchor="middle" font-family="Pirata One, cursive">?</text>
                                 </svg>
-                                <div class="rank-badge" id="hero-rank">GOAT</div>
                             `;
                         }
                     }
@@ -865,14 +875,34 @@
                     // Update query context (show what was searched)
                     const queryTerm = document.getElementById('query-term');
                     const queryTopic = document.getElementById('query-topic');
+                    const queryDimensionsEL = document.getElementById('query-dimensions');
                     const chartCharacterName = document.getElementById('chart-character-name');
                     const retrievedCount = document.getElementById('retrieved-count');
+                    const butt0 = document.getElementById('butt0');
+                    const butt1 = document.getElementById('butt1');
+                    const butt2 = document.getElementById('butt2');
 
                     if (queryTerm) queryTerm.textContent = query;
                     if (queryTopic) queryTopic.textContent = query;
+                    if (queryDimensionsEL) queryDimensionsEL.textContent = queryDimensions.join(", ");
                     if (chartCharacterName) chartCharacterName.textContent = characterKey;
                     if (retrievedCount) retrievedCount.textContent = character.retrieved.length;
 
+                    if (butt0) {
+                        butt0.textContent = relatedCharacters[0] || 'N/A';
+                        butt0.onclick = relatedCharacters[0] ? () => searchSuggestion(relatedCharacters[0]) : null;
+                    }
+                    if (butt1) {
+                        butt1.textContent = relatedCharacters[1] || 'N/A';
+                        butt1.onclick = relatedCharacters[1] ? () => searchSuggestion(relatedCharacters[1]) : null;
+                    }
+                    if (butt2) {
+                        butt2.textContent = relatedCharacters[2] || 'N/A';
+                        butt2.onclick = relatedCharacters[2] ? () => searchSuggestion(relatedCharacters[2]) : null;
+                    }
+                    //update top dimensions
+                    const dimensionsContainer = document.getElementById('top-dimensions');
+                    dimensionsContainer.textContent = topDimensions.join(", ");
                     // Update chart
                     updateChart(character, query);
 
@@ -1047,7 +1077,7 @@
                             source</span>
                     </div>
                 `;
-                
+
                 commentContainer.appendChild(commentEl);
             });
         }
