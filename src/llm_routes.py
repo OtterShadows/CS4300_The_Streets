@@ -16,7 +16,7 @@ from infosci_spark_client import LLMClient
 logger = logging.getLogger(__name__)
 
 
-def llm_search_decision(client, user_message):
+def KARDASHIAN_llm_search_decision(client, user_message):
     """Ask the LLM whether to search the DB and which word to use."""
     messages = [
         {
@@ -41,6 +41,8 @@ def llm_search_decision(client, user_message):
     if re.search(r"\bYES\b", content):
         return True, "Kardashian"
     return False, None
+
+
 
 # Use the LLM to modify the query to hopefully yield better IR system results.
 # Input: LLM client, user query
@@ -130,46 +132,7 @@ def register_chat_route(app, json_search=None):
         character_and_comments_json = json.loads(json_search(modified_query, use_svd))
         return character_and_comments_json
 
-        # TODO: Code below is from the template. For generating a natural language answer for the user, I believe.
-        # This would be Maureen's task to adapt for our project.
-        # Note for later: this code below was assuming the "methods" for this route was "POST" not "GET"...
-        # I'm not entirely sure how this affects this code, but it's likely whoever implements
-        # the chat summarizing will have to create a new route (with method POST) specifically for
-        # the LLM interpreting the character/comments that the IR system returned
 
-        # if use_search:
-        #     context_text = "\n\n---\n\n".join(
-        #         f"Title: {ep['title']}\nDescription: {ep['descr']}\nIMDB Rating: {ep['imdb_rating']}"
-        #         for ep in episodes
-        #     ) or "No matching episodes found."
-        #     messages = [
-        #         {"role": "system", "content": "Answer questions about Keeping Up with the Kardashians using only the episode information provided."},
-        #         {"role": "user", "content": f"Episode information:\n\n{context_text}\n\nUser question: {user_message}"},
-        #     ]
-        # else:
-        #     messages = [
-        #         {"role": "system", "content": "You are a helpful assistant for Keeping Up with the Kardashians questions."},
-        #         {"role": "user", "content": user_message},
-        #     ]
-
-        # def generate():
-        #     if use_search and search_term:
-        #         yield f"data: {json.dumps({'search_term': modified_query})}\n\n"
-        #     try:
-        #         for chunk in client.chat(messages, stream=True):
-        #             if chunk.get("content"):
-        #                 yield f"data: {json.dumps({'content': chunk['content']})}\n\n"
-        #     except Exception as e:
-        #         logger.error(f"Streaming error: {e}")
-        #         yield f"data: {json.dumps({'error': 'Streaming error occurred'})}\n\n"
-
-        return Response(
-            # Stream the response to the client ("stream_with_context" is from Flask)
-            stream_with_context(generate()),
-            mimetype="text/event-stream",
-            # Set this to prevent the browser from caching the response
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-        )
 
     @app.route("/character-summary", methods=["POST"])
     def generate_character_summary():
@@ -200,12 +163,12 @@ def register_chat_route(app, json_search=None):
 
             prompt = f"""Generate a brief, engaging 2-3 sentence summary about the community's perception of {char_name}.
 
-Use this data:
-- Reputation Score: {reputation_score}/10
-- Community Consensus: {consensus}
-- Total Comments Analyzed: {total_comments}{comments_context}
+                Use this data:
+                - Reputation Score: {reputation_score}/10
+                - Community Consensus: {consensus}
+                - Total Comments Analyzed: {total_comments}{comments_context}
 
-Write in a conversational tone that captures the community's sentiment. Be specific and insightful."""
+                Write in a conversational tone that captures the community's sentiment. Be specific and insightful."""
 
             messages = [
                 {
