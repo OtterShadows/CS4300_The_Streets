@@ -70,21 +70,15 @@ def llm_modify_query(client, user_message):
                 ""
                 "You must modify the given user query to one that would more accurately match relevant comments of r/Piratefolk. "
                 "Example 1: 'Who is the most liked' character should be transformed to something like "
-                "'is the GOAT. is the best character. i like. low diffs. neg diffs. carries.', etc. with similar comments "
-                "that would match with how people talk in discussions of that character."
+                "'GOAT. best character. like. carries.'"
+                ", semething that would match with how people talk in discussions of that character."
                 ""
-                "Example 2: 'Most bum character' -> 'bum. useless. overrated.' etc. "
+                "Example 2: 'Most bum character' -> 'bum. useless. overrated.'"
                 ""
-                "Example 3: 'Who is the goat of wano?' -> 'wano country arc. goat. carries. carried. strongest. powerful.' "
+                "Example 3: 'Who is the goat of wano?' -> 'wano. goat. carries. carried. strongest. powerful.' "
                 ""
-                "Always include lots of synonyms (also including slang) in order to cast a wide net for retrieving comments."
                 ""
-                "IMPORTANT: If the user query seems like it is seeking some information for which a character would "
-                "be a proper answer, like the examples above, begin your response with YES followed by one space and the "
-                "modified query. If instead returning a character wouldn't make sense for the query, (e.g query is "
-                "'luffy katakuri fight', where the user probably just wants to see comments discussing the fight) "
-                "return NO_CHARACTER followed by one space and the modified query."
-                "IMPORTANT if you recieve a query that is just a character name, do not modify the query."
+                "If you recieve a query that is just a character name, do not modify the query."
             )
         },
         {"role": "user", "content": user_message},
@@ -143,6 +137,11 @@ def register_chat_route(app, json_search=None):
         consensus = (data.get("consensus") or "Mixed").strip()
         total_comments = data.get("total_comments", 0)
         top_comments = data.get("top_comments", [])
+        query = (data.get("message") or "").strip()
+        if query == "":
+            print(f"WARNINGGGGGGGGG: LLM DOES NOT KNOW WHAT THE QUERY IS.")
+        else:
+            print(f"Post LLM receives query: {query}")
 
         if not char_name:
             return jsonify({"error": "Character name is required"}), 400
@@ -164,11 +163,17 @@ def register_chat_route(app, json_search=None):
             prompt = f"""Generate a brief, engaging 2-3 sentence summary about the community's perception of {char_name}.
 
                 Use this data:
-                - Reputation Score: {reputation_score}/10
+                - Query: {query}
+                - Current Reputation Score: {reputation_score}/10
                 - Community Consensus: {consensus}
-                - Total Comments Analyzed: {total_comments}{comments_context}
+                - Top Comments: {comments_context}
 
-                Write in a conversational tone that captures the community's sentiment. Be specific and insightful."""
+                Write in a conversational tone that captures the community's sentiment. Be specific and insightful.
+                Be absolutely sure to discuss how the comments support {char_name} being the returned character for
+                the user's query.
+                Only if relevant to bolster the connection between the query and the IR's returned character,
+                you may use the reputation score and consensus to inform the summary, but do not just restate them.
+                """
 
             messages = [
                 {

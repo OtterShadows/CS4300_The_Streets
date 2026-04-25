@@ -408,6 +408,8 @@
         // Generate LLM-powered character summary
         async function generateCharacterSummary(characterName, characterData) {
             try {
+                let query =document.getElementById('character-search-val').value.toLowerCase().trim();
+
                 const response = await fetch('/character-summary', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -416,7 +418,8 @@
                         reputation_score: characterData.currentRating,
                         consensus: characterData.sentiment,
                         total_comments: characterData.total_comments,
-                        top_comments: characterData.comments.slice(0, 3)
+                        top_comments: characterData.comments.slice(0, 4),
+                        message: query
                     })
                 });
 
