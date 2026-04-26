@@ -91,21 +91,18 @@ def llm_modify_query(client, user_message):
     print("Finished calculating LLM response for query modification...")
     content = (response.get("content") or "").strip().upper()
     print(f"Content: {content}")
-    logger.info(f"LLM search decision: {content}")
-    if re.search(r"\bNO_CHARACTER\b", content):
-        return_character = False
-    else:
-        return_character = True
+    logger.info(f"LLM search content: {content}")
+    return_character = True
     return return_character, content
  
 
 
-def register_chat_route(app, json_search=None):
+def register_chat_route(app, json_search_k=None):
     """Register the /chat SSE endpoint and /character-summary endpoint. Called from routes.py."""
 
     @app.route("/chat", methods=["GET"])
     def chat():
-        if not json_search:
+        if not json_search_k:
             return jsonify({"error": "Search functionality not available"}), 503
             
         data = request.get_json(silent=True) or {}
@@ -123,7 +120,7 @@ def register_chat_route(app, json_search=None):
         print(f"Modified query: {modified_query}\n")
         # return_character: TRUE if a character should be displayed for the results 
         use_svd = request.args.get("use_svd", "false").lower() == "true"
-        character_and_comments_json = json.loads(json_search(modified_query, use_svd))
+        character_and_comments_json = json.loads(json_search_k(modified_query, use_svd))
         return character_and_comments_json
 
     @app.route("/character-summary", methods=["POST"])

@@ -758,6 +758,11 @@
                     const top_dims = data.top_dimensions || [];
                     const qdims = data.query_dimensions || [];
                     const relatedCharacters = data.related_characters || [];
+                    const character2 = data.character2 || 'ERROR';
+                    const character3 = data.character3 || 'ERROR';
+                    const retrievedComments2 = data.relevant_comments2 || [];
+                    const retrievedComments3 = data.relevant_comments3 || [];
+                    const directNameSearch = data.direct_name_search || false;
                     console.log(`Best character match: "${characterName}"`);
                     displayCharacterResults(characterName, trimmedQuery, retrievedComments, top_dims, qdims, relatedCharacters);
                 })

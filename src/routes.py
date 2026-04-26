@@ -140,21 +140,40 @@ def json_search_k(query, use_svd):
     # first check if the query matches a character name (with fuzzy matching)
     if character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well) != "":
         print(f"Using character_counts.fuzzy_match_character")
+        direct_name_search = True
         result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well)
         related = svd_testing.closest_docs_to_query(result)[1:4]
+        direct_name_search = True
+
     # calculate the similarity of the query with the character "docs" and 
     # return the most similar character
     else:
+        direct_name_search = False
         print(f"Using svd_testing.closest_doc_to_query")
         result = svd_testing.closest_doc_to_query(query)
         print(f"Received search query: '{query}' -> matched character: '{result}'")
         related = svd_testing.closest_docs_to_query(query)[1:4]
+
+        character2 = related[0]
+        character3 = related[1]
 
     
     if use_svd:
         print("Using SVD for comment retrieval")
         relevant_comments = svd_testing.svd_retrieve_k_sim_comments(
             character = result,
+            query = query,
+            tfidf_matrix = tfidf_matrix,
+            k = 30
+        )
+        relevant_comments2 = svd_testing.svd_retrieve_k_sim_comments(
+            character = character2,
+            query = query,
+            tfidf_matrix = tfidf_matrix,
+            k = 30
+        )
+        relevant_comments3 = svd_testing.svd_retrieve_k_sim_comments(
+            character = character3,
             query = query,
             tfidf_matrix = tfidf_matrix,
             k = 30
@@ -167,8 +186,22 @@ def json_search_k(query, use_svd):
             comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
             k = 50
         )
+        relevant_comments2 = similarity_calc.newer_retrieve_k_sim_comments(
+            character = character2,
+            query = query,
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
+        relevant_comments3 = similarity_calc.newer_retrieve_k_sim_comments(
+            character = character3,
+            query = query,
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
 
     print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
+    print(f"Retrieved {len(relevant_comments2)} relevant comments for character '{character2}' and query '{query}'")
+    print(f"Retrieved {len(relevant_comments3)} relevant comments for character '{character3}' and query '{query}'")
 
     comment_list = [] # list of relevant Comment objects, as defined in character_class.py
     for (id, score) in relevant_comments:
@@ -176,6 +209,21 @@ def json_search_k(query, use_svd):
         if c is not None:
             comment_list.append(c)
     print(f"DEBUG: Created {len(comment_list)} Comment objects.")
+
+    comment_list2 = []
+    for (id, score) in relevant_comments2:
+        c = character_class.create_comment(id, score, comments_df)
+        if c is not None:
+            comment_list2.append(c)
+    print(f"DEBUG: Created {len(comment_list2)} Comment objects for character2.")
+
+    comment_list3 = []
+    for (id, score) in relevant_comments3:
+        c = character_class.create_comment(id, score, comments_df)
+        if c is not None:
+            comment_list3.append(c)
+    print(f"DEBUG: Created {len(comment_list3)} Comment objects for character3.")
+
 
     #return top dimensions for the character as well, for use in the frontend
     char_idx = characters.index(result)
@@ -196,7 +244,12 @@ def json_search_k(query, use_svd):
         "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list],
         "top_dimensions": top_dim_names,
         "query_dimensions": top_dim_names,
-        "related_characters": related
+        "related_characters": related,
+        "character2": character2,
+        "relevant_comments2": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list2],
+        "character3": character3,
+        "relevant_comments3": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list3],
+        "direct_name_search": direct_name_search
     })
 
 def fetch_all_characters():
@@ -351,7 +404,7 @@ def register_routes(app):
     def search():
         query = request.args.get("q", "")
         use_svd = request.args.get("use_svd", "false").lower() == "true"
-        character_and_comments_json = json_search(query, use_svd) # get character name and relevant comments from query
+        character_and_comments_json = json_search_k(query, use_svd) # get character name and relevant comments from query
         return character_and_comments_json
     
     @app.route("/csearch")
