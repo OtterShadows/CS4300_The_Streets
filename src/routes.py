@@ -134,6 +134,7 @@ def json_search(query, use_svd):
     })
 
 def json_search_k(query, use_svd):
+    print(f"DEBUG: Starting json_search_k")
     if not query.strip():
         return json.dumps({"error": "empty query"})
     related = []
@@ -144,6 +145,8 @@ def json_search_k(query, use_svd):
         result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well)
         related = svd_testing.closest_docs_to_query(result)[1:4]
         direct_name_search = True
+        character2 = related[0]
+        character3 = related[1]
 
     # calculate the similarity of the query with the character "docs" and 
     # return the most similar character
@@ -435,4 +438,4 @@ def register_routes(app):
 
     if USE_LLM:
         from llm_routes import register_chat_route
-        register_chat_route(app, json_search)
+        register_chat_route(app, json_search_k)
