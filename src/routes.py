@@ -41,25 +41,7 @@ comments_df, postings_df = character_class.load_data()
 ONE_PIECE_API_URL = "https://onepieceql.com/api/graphql"
 _api_cache = {}  # Cache for API data
 
-# Copying from flask template for reference, not for use in project
-# input: query
-# output: list of matching episodes (title, descr, imdb_rating) in json format
-def template_json_search(query):
-    if not query or not query.strip():
-        query = "Kardashian"
-    results = db.session.query(Episode, Review).join(
-        Review, Episode.id == Review.id
-    ).filter(
-        Episode.title.ilike(f'%{query}%')
-    ).all()
-    matches = []
-    for episode, review in results:
-        matches.append({
-            'title': episode.title,
-            'descr': episode.descr,
-            'imdb_rating': review.imdb_rating
-        })
-    return json.dumps(matches)
+
 
 #giving names to each of the discovered svd dimensions
 svd_dimension_names = {
@@ -119,16 +101,10 @@ def json_search(query, use_svd):
             comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
             k = 50
         )
-    
-
-    
 
     print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
 
-
-    # relevant_comments_containing_character = similarity_calc.prioritize_comments_by_character(result, relevant_comments)
-
-    comment_list = [] # list of relevant Comment objects, where "Comment" defined in character_class.py
+    comment_list = [] # list of relevant Comment objects, as defined in character_class.py
     for (id, score) in relevant_comments:
         c = character_class.create_comment(id, score, comments_df)
         if c is not None:
@@ -157,6 +133,71 @@ def json_search(query, use_svd):
         "related_characters": related
     })
 
+def json_search_k(query, use_svd):
+    if not query.strip():
+        return json.dumps({"error": "empty query"})
+    related = []
+    # first check if the query matches a character name (with fuzzy matching)
+    if character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well) != "":
+        print(f"Using character_counts.fuzzy_match_character")
+        result = character_counts.fuzzy_match_character(query, character_counts.names_and_variants_well)
+        related = svd_testing.closest_docs_to_query(result)[1:4]
+    # calculate the similarity of the query with the character "docs" and 
+    # return the most similar character
+    else:
+        print(f"Using svd_testing.closest_doc_to_query")
+        result = svd_testing.closest_doc_to_query(query)
+        print(f"Received search query: '{query}' -> matched character: '{result}'")
+        related = svd_testing.closest_docs_to_query(query)[1:4]
+
+    
+    if use_svd:
+        print("Using SVD for comment retrieval")
+        relevant_comments = svd_testing.svd_retrieve_k_sim_comments(
+            character = result,
+            query = query,
+            tfidf_matrix = tfidf_matrix,
+            k = 30
+        )
+    else:
+        print("Using original similarity_calc for comment retrieval")
+        relevant_comments = similarity_calc.newer_retrieve_k_sim_comments(
+            character = result,
+            query = query,
+            comment_term_vectorizer = similarity_calc.comment_term_vectorizer,
+            k = 50
+        )
+
+    print(f"Retrieved {len(relevant_comments)} relevant comments for character '{result}' and query '{query}'")
+
+    comment_list = [] # list of relevant Comment objects, as defined in character_class.py
+    for (id, score) in relevant_comments:
+        c = character_class.create_comment(id, score, comments_df)
+        if c is not None:
+            comment_list.append(c)
+    print(f"DEBUG: Created {len(comment_list)} Comment objects.")
+
+    #return top dimensions for the character as well, for use in the frontend
+    char_idx = characters.index(result)
+    scores = svd_words_compressed[char_idx]
+    top_dimensions = scores.argsort()[-3:][::-1]
+    top_dim_names = [svd_dimension_names.get(d) for d in top_dimensions]
+    print(f"Top dimensions for character '{result}': {top_dim_names}")
+    query_tfidf = vectorizer.transform([query]).toarray().squeeze()
+
+    # project into latent space
+    query_vec = query_tfidf @ svd_words_compressed
+
+    top_dims = query_vec.argsort()[::-1][:3]
+    top_dim_names = [svd_dimension_names.get(i) for i in top_dims]
+    print(f"Top dimensions for query '{query}': {top_dim_names}")
+    return json.dumps({
+        "character": result, # string of most similar character to query
+        "relevant_comments": [{"user": c.user, "text": c.text, "sentiment": c.sentiment, "rating": c.rating, "score": c.score, "timestamp": c.timestamp, "controversiality": c.controversiality, "sim_score": c.sim_score, "permalink": c.permalink} for c in comment_list],
+        "top_dimensions": top_dim_names,
+        "query_dimensions": top_dim_names,
+        "related_characters": related
+    })
 
 def fetch_all_characters():
     """Fetch all One Piece characters from the GraphQL API with pagination"""

@@ -126,8 +126,6 @@ def register_chat_route(app, json_search=None):
         character_and_comments_json = json.loads(json_search(modified_query, use_svd))
         return character_and_comments_json
 
-
-
     @app.route("/character-summary", methods=["POST"])
     def generate_character_summary():
         """Generate an LLM-powered summary for a character based on their data."""
@@ -211,14 +209,14 @@ def register_chat_route(app, json_search=None):
 
             prompt = f"""Explain what a reputation score of {score}/10 means for {char_name if char_name else 'a character'}.
 
-Be concise (1-2 sentences). Interpret the score:
-- 0-2: Highly controversial or negatively received
-- 2-4: Mixed to mostly negative sentiment
-- 4-6: Mixed or neutral sentiment
-- 6-8: Mostly positive sentiment
-- 8-10: Highly positive reception
+            Be concise (1-2 sentences). Interpret the score:
+            - 0-2: Highly controversial or negatively received
+            - 2-4: Mixed to mostly negative sentiment
+            - 4-6: Mixed or neutral sentiment
+            - 6-8: Mostly positive sentiment
+            - 8-10: Highly positive reception
 
-Write in a way that helps users understand the community's perception."""
+            Write in a way that helps users understand the community's perception."""
 
             messages = [
                 {
@@ -256,14 +254,14 @@ Write in a way that helps users understand the community's perception."""
 
             prompt = f"""Explain what "{consensus}" consensus means for {char_name if char_name else 'a character'} in the community.
 
-Briefly describe (1-2 sentences) what this sentiment level indicates:
-- "Very Negative": Strong community disapproval
-- "Negative": More criticism than praise
-- "Mixed": Both supporters and critics
-- "Positive": More praise than criticism
-- "Very Positive": Strong community approval
+            Briefly describe (1-2 sentences) what this sentiment level indicates:
+            - "Very Negative": Strong community disapproval
+            - "Negative": More criticism than praise
+            - "Mixed": Both supporters and critics
+            - "Positive": More praise than criticism
+            - "Very Positive": Strong community approval
 
-Be conversational and help users understand the community's overall view."""
+            Be conversational and help users understand the community's overall view."""
 
             messages = [
                 {

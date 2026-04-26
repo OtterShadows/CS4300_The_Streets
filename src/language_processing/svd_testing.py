@@ -64,7 +64,7 @@ def make_pickle():
 
 def closest_docs_to_query(query):
     print(f"DEBUG: Characters from model.pkl: {characters}")
-    k=5
+    k=3
     query_tfidf = vectorizer.transform([query]).toarray()
     query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
     sims = docs_compressed_normed.dot(query_vec)
