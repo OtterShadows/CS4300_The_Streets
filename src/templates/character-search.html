@@ -369,7 +369,10 @@
                                     <circle cx="55" cy="32" r="3" fill="#FFD700" opacity="0.8" />
                                 </svg> Den Den Mushi Messages</h3>
                             <p class="section-subtitle streets-subtitle">What the Grand Line is saying about "<span
-                                    id="query-topic">character</span>" on r/PirateFolk</p>
+                                    id="query-topic">character</span>" on r/PirateFolk? 
+                                Some other pirates have also been mentioned regarding this topic...
+                                click on their names below to see what people have been saying about them!
+
                         </div>
                         <div class="filter-toggle">
                             <label for="filter-switch">Filter sensitive content</label>
@@ -433,6 +436,10 @@
                         consensus: characterData.sentiment,
                         total_comments: characterData.total_comments,
                         top_comments: characterData.comments.slice(0, 4),
+                        character2: currentRelatedCharacters[0] || '',
+                        character3: currentRelatedCharacters[1] || '',
+                        relevant_comments2: currentRetrievedComments2,
+                        relevant_comments3: currentRetrievedComments3,
                         message: query
                     })
                 });

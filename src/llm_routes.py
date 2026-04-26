@@ -132,6 +132,14 @@ def register_chat_route(app, json_search_k=None):
         consensus = (data.get("consensus") or "Mixed").strip()
         total_comments = data.get("total_comments", 0)
         top_comments = data.get("top_comments", [])
+        character2 = data.get("character2", "")
+        # print(f"DEBUG: character2 = {character2}")
+        character3 = data.get("character3", "")
+        # print(f"DEBUG: character3 = {character3}")
+        relevant_comments2 = data.get("relevant_comments2", [])
+        # print(f"DEBUG: relevant_comments2 = {relevant_comments2}")
+        relevant_comments3 = data.get("relevant_comments3", [])
+        # print(f"DEBUG: relevant_comments3 = {relevant_comments3}")
         query = (data.get("message") or "").strip()
         if query == "":
             print(f"WARNINGGGGGGGGG: LLM DOES NOT KNOW WHAT THE QUERY IS.")
@@ -152,7 +160,19 @@ def register_chat_route(app, json_search_k=None):
             comments_context = ""
             if top_comments:
                 comments_context = "\nTop community comments:\n" + "\n".join(
-                    f"- {c.get('text', '')[:150]}" for c in top_comments[:3]
+                    f"- {c.get('text', '')[:150]}" for c in top_comments[:5]
+                )
+
+            comments_context2 = ""
+            if relevant_comments2:
+                comments_context2 += "\n\nRelevant comments for " + character2 + ":\n" + "\n".join(
+                    f"- {c.get('text', '')[:150]}" for c in relevant_comments2[:2]
+                )
+            
+            comments_context3 = ""
+            if relevant_comments3:
+                comments_context3 += "\n\nRelevant comments for " + character3 + ":\n" + "\n".join(
+                    f"- {c.get('text', '')[:150]}" for c in relevant_comments3[:2]
                 )
 
             prompt = f"""Generate a brief, engaging 2-3 sentence summary about the community's perception of {char_name}.
@@ -162,12 +182,22 @@ def register_chat_route(app, json_search_k=None):
                 - Current Reputation Score: {reputation_score}/10
                 - Community Consensus: {consensus}
                 - Top Comments: {comments_context}
+                - 2nd matched character: {character2}
+                - 3rd matched character: {character3}
+                - Retrieved comments for 2nd character: {comments_context2}
+                - Retrieved comments for 3rd character: {comments_context3}
+                
 
                 Write in a conversational tone that captures the community's sentiment. Be specific and insightful.
                 Be absolutely sure to discuss how the comments support {char_name} being the returned character for
                 the user's query.
                 Only if relevant to bolster the connection between the query and the IR's returned character,
                 you may use the reputation score and consensus to inform the summary, but do not just restate them.
+
+                {character2} and {character3} are the second and third place matches for the query.
+                If there is a strong case based on the retrieved comments for either the 2nd character or 3rd,
+                you may mention them in the summary to show that the answer to the question (i.e. the query) is a
+                point of debate in the fandom.
                 """
 
             messages = [
