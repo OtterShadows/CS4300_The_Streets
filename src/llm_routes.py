@@ -16,7 +16,7 @@ from infosci_spark_client import LLMClient
 logger = logging.getLogger(__name__)
 
 
-def llm_search_decision(client, user_message):
+def KARDASHIAN_llm_search_decision(client, user_message):
     """Ask the LLM whether to search the DB and which word to use."""
     messages = [
         {
@@ -41,6 +41,8 @@ def llm_search_decision(client, user_message):
     if re.search(r"\bYES\b", content):
         return True, "Kardashian"
     return False, None
+
+
 
 # Use the LLM to modify the query to hopefully yield better IR system results.
 # Input: LLM client, user query
@@ -68,21 +70,15 @@ def llm_modify_query(client, user_message):
                 ""
                 "You must modify the given user query to one that would more accurately match relevant comments of r/Piratefolk. "
                 "Example 1: 'Who is the most liked' character should be transformed to something like "
-                "'is the GOAT. is the best character. i like. low diffs. neg diffs. carries.', etc. with similar comments "
-                "that would match with how people talk in discussions of that character."
+                "'GOAT. best character. like. carries.'"
+                ", semething that would match with how people talk in discussions of that character."
                 ""
-                "Example 2: 'Most bum character' -> 'bum. useless. overrated.' etc. "
+                "Example 2: 'Most bum character' -> 'bum. useless. overrated.'"
                 ""
-                "Example 3: 'Who is the goat of wano?' -> 'wano country arc. goat. carries. carried. strongest. powerful.' "
+                "Example 3: 'Who is the goat of wano?' -> 'wano. goat. carries. carried. strongest. powerful.' "
                 ""
-                "Always include lots of synonyms (also including slang) in order to cast a wide net for retrieving comments."
                 ""
-                "IMPORTANT: If the user query seems like it is seeking some information for which a character would "
-                "be a proper answer, like the examples above, begin your response with YES followed by one space and the "
-                "modified query. If instead returning a character wouldn't make sense for the query, (e.g query is "
-                "'luffy katakuri fight', where the user probably just wants to see comments discussing the fight) "
-                "return NO_CHARACTER followed by one space and the modified query."
-                "IMPORTANT if you recieve a query that is just a character name, do not modify the query."
+                "If you recieve a query that is just a character name, do not modify the query."
             )
         },
         {"role": "user", "content": user_message},
@@ -95,21 +91,18 @@ def llm_modify_query(client, user_message):
     print("Finished calculating LLM response for query modification...")
     content = (response.get("content") or "").strip().upper()
     print(f"Content: {content}")
-    logger.info(f"LLM search decision: {content}")
-    if re.search(r"\bNO_CHARACTER\b", content):
-        return_character = False
-    else:
-        return_character = True
+    logger.info(f"LLM search content: {content}")
+    return_character = True
     return return_character, content
  
 
 
-def register_chat_route(app, json_search=None):
+def register_chat_route(app, json_search_k=None):
     """Register the /chat SSE endpoint and /character-summary endpoint. Called from routes.py."""
 
     @app.route("/chat", methods=["GET"])
     def chat():
-        if not json_search:
+        if not json_search_k:
             return jsonify({"error": "Search functionality not available"}), 503
             
         data = request.get_json(silent=True) or {}
@@ -127,49 +120,8 @@ def register_chat_route(app, json_search=None):
         print(f"Modified query: {modified_query}\n")
         # return_character: TRUE if a character should be displayed for the results 
         use_svd = request.args.get("use_svd", "false").lower() == "true"
-        character_and_comments_json = json.loads(json_search(modified_query, use_svd))
+        character_and_comments_json = json.loads(json_search_k(modified_query, use_svd))
         return character_and_comments_json
-
-        # TODO: Code below is from the template. For generating a natural language answer for the user, I believe.
-        # This would be Maureen's task to adapt for our project.
-        # Note for later: this code below was assuming the "methods" for this route was "POST" not "GET"...
-        # I'm not entirely sure how this affects this code, but it's likely whoever implements
-        # the chat summarizing will have to create a new route (with method POST) specifically for
-        # the LLM interpreting the character/comments that the IR system returned
-
-        # if use_search:
-        #     context_text = "\n\n---\n\n".join(
-        #         f"Title: {ep['title']}\nDescription: {ep['descr']}\nIMDB Rating: {ep['imdb_rating']}"
-        #         for ep in episodes
-        #     ) or "No matching episodes found."
-        #     messages = [
-        #         {"role": "system", "content": "Answer questions about Keeping Up with the Kardashians using only the episode information provided."},
-        #         {"role": "user", "content": f"Episode information:\n\n{context_text}\n\nUser question: {user_message}"},
-        #     ]
-        # else:
-        #     messages = [
-        #         {"role": "system", "content": "You are a helpful assistant for Keeping Up with the Kardashians questions."},
-        #         {"role": "user", "content": user_message},
-        #     ]
-
-        # def generate():
-        #     if use_search and search_term:
-        #         yield f"data: {json.dumps({'search_term': modified_query})}\n\n"
-        #     try:
-        #         for chunk in client.chat(messages, stream=True):
-        #             if chunk.get("content"):
-        #                 yield f"data: {json.dumps({'content': chunk['content']})}\n\n"
-        #     except Exception as e:
-        #         logger.error(f"Streaming error: {e}")
-        #         yield f"data: {json.dumps({'error': 'Streaming error occurred'})}\n\n"
-
-        return Response(
-            # Stream the response to the client ("stream_with_context" is from Flask)
-            stream_with_context(generate()),
-            mimetype="text/event-stream",
-            # Set this to prevent the browser from caching the response
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-        )
 
     @app.route("/character-summary", methods=["POST"])
     def generate_character_summary():
@@ -180,6 +132,19 @@ def register_chat_route(app, json_search=None):
         consensus = (data.get("consensus") or "Mixed").strip()
         total_comments = data.get("total_comments", 0)
         top_comments = data.get("top_comments", [])
+        character2 = data.get("character2", "")
+        # print(f"DEBUG: character2 = {character2}")
+        character3 = data.get("character3", "")
+        # print(f"DEBUG: character3 = {character3}")
+        relevant_comments2 = data.get("relevant_comments2", [])
+        # print(f"DEBUG: relevant_comments2 = {relevant_comments2}")
+        relevant_comments3 = data.get("relevant_comments3", [])
+        # print(f"DEBUG: relevant_comments3 = {relevant_comments3}")
+        query = (data.get("message") or "").strip()
+        if query == "":
+            print(f"WARNINGGGGGGGGG: LLM DOES NOT KNOW WHAT THE QUERY IS.")
+        else:
+            print(f"Post LLM receives query: {query}")
 
         if not char_name:
             return jsonify({"error": "Character name is required"}), 400
@@ -194,18 +159,54 @@ def register_chat_route(app, json_search=None):
             # Build context from top comments
             comments_context = ""
             if top_comments:
-                comments_context = "\nTop community comments:\n" + "\n".join(
-                    f"- {c.get('text', '')[:150]}" for c in top_comments[:3]
+                comments_context = "Relevant comments for " + char_name + ":\n" + "\n".join(
+                    f"- {c.get('text', '')[:500]}" for c in top_comments[:7]
                 )
 
-            prompt = f"""Generate a brief, engaging 2-3 sentence summary about the community's perception of {char_name}.
+            comments_context2 = ""
+            if relevant_comments2:
+                comments_context2 += "\n\nRelevant comments for " + character2 + ":\n" + "\n".join(
+                    f"- {c.get('text', '')[:150]}" for c in relevant_comments2[:4]
+                )
+            
+            comments_context3 = ""
+            if relevant_comments3:
+                comments_context3 += "\n\nRelevant comments for " + character3 + ":\n" + "\n".join(
+                    f"- {c.get('text', '')[:150]}" for c in relevant_comments3[:4]
+                )
 
-Use this data:
-- Reputation Score: {reputation_score}/10
-- Community Consensus: {consensus}
-- Total Comments Analyzed: {total_comments}{comments_context}
+            prompt = f"""Generate an engaging 4-5 sentence summary about the community's perception of {char_name}.
 
-Write in a conversational tone that captures the community's sentiment. Be specific and insightful."""
+                Use this data:
+                - Query: {query}
+                - Current Reputation Score: {reputation_score}/10
+                - Community Consensus: {consensus}
+                - Top Comments: {comments_context}
+                - 2nd matched character: {character2}
+                - 3rd matched character: {character3}
+                - Retrieved comments for 2nd character: {comments_context2}
+                - Retrieved comments for 3rd character: {comments_context3}
+                
+                IMPORTANT: There should always be information that comes from the comments. If you say a second
+                character match is also a contender for the query, you must cite some detail in the retrieved
+                comments to back that up.
+
+
+                Write in a conversational tone that captures the community's sentiment. Be specific and insightful.
+                Be absolutely sure to discuss how the comments support {char_name} being the returned character for
+                the user's query.
+                Only if relevant to bolster the connection between the query and the IR's returned character,
+                you may use the reputation score and consensus to inform the summary, but do not just restate them.
+
+                {character2} and {character3} are the second and third place matches for the query.
+                When there is any evidence based on the retrieved comments for either the 2nd character or 3rd
+                that one of them could also be a reasonable answer to the query,
+                mention them in the summary and cite the evidence that supports them being a contender.
+                
+                ALSO IMPORTANT:If you are given no relevant comments, you should mention that no relevant comments were able to be found.
+                """
+
+            # print(f"DEBUG: LLM prompt for character summary:\n{prompt}\n")
 
             messages = [
                 {
@@ -243,14 +244,14 @@ Write in a conversational tone that captures the community's sentiment. Be speci
 
             prompt = f"""Explain what a reputation score of {score}/10 means for {char_name if char_name else 'a character'}.
 
-Be concise (1-2 sentences). Interpret the score:
-- 0-2: Highly controversial or negatively received
-- 2-4: Mixed to mostly negative sentiment
-- 4-6: Mixed or neutral sentiment
-- 6-8: Mostly positive sentiment
-- 8-10: Highly positive reception
+            Be concise (1-2 sentences). Interpret the score:
+            - 0-2: Highly controversial or negatively received
+            - 2-4: Mixed to mostly negative sentiment
+            - 4-6: Mixed or neutral sentiment
+            - 6-8: Mostly positive sentiment
+            - 8-10: Highly positive reception
 
-Write in a way that helps users understand the community's perception."""
+            Write in a way that helps users understand the community's perception."""
 
             messages = [
                 {
@@ -288,14 +289,14 @@ Write in a way that helps users understand the community's perception."""
 
             prompt = f"""Explain what "{consensus}" consensus means for {char_name if char_name else 'a character'} in the community.
 
-Briefly describe (1-2 sentences) what this sentiment level indicates:
-- "Very Negative": Strong community disapproval
-- "Negative": More criticism than praise
-- "Mixed": Both supporters and critics
-- "Positive": More praise than criticism
-- "Very Positive": Strong community approval
+            Briefly describe (1-2 sentences) what this sentiment level indicates:
+            - "Very Negative": Strong community disapproval
+            - "Negative": More criticism than praise
+            - "Mixed": Both supporters and critics
+            - "Positive": More praise than criticism
+            - "Very Positive": Strong community approval
 
-Be conversational and help users understand the community's overall view."""
+            Be conversational and help users understand the community's overall view."""
 
             messages = [
                 {

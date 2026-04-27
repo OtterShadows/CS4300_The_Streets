@@ -22,8 +22,8 @@ td_matrix = data["matrix"]
 characters =data["characters"]
 #u, s, v_trans = svds(td_matrix, k=100)
 print(f"DEBUG: Loaded model.pkl with {len(characters)} characters and td_matrix shape {td_matrix.shape}")
-print(f"DEBUG: Sample characters: {characters[:5]}")
-print(f"DEBUG: Sample td_matrix row: {td_matrix[0].toarray()[:5]}")
+# print(f"DEBUG: Sample characters: {characters[:5]}")
+# print(f"DEBUG: Sample td_matrix row: {td_matrix[0].toarray()[:5]}")
 
 
 reverse_postings_filename = "reverse_postings_(well).csv"
@@ -52,7 +52,7 @@ index_to_word = {i:t for t,i in word_to_index.items()}
 words_compressed_normed = normalize(words_compressed, axis = 1)
 docs_compressed_normed = normalize(docs_compressed)
 
-print(f"DEBUG: docs_compressed_normed shape: {docs_compressed_normed.shape}, words_compressed_normed shape: {words_compressed_normed.shape}")
+# print(f"DEBUG: docs_compressed_normed shape: {docs_compressed_normed.shape}, words_compressed_normed shape: {words_compressed_normed.shape}")
 
 def make_pickle():
     joblib.dump({
@@ -63,8 +63,8 @@ def make_pickle():
 # make_pickle()
 
 def closest_docs_to_query(query):
-    print(f"DEBUG: Characters from model.pkl: {characters}")
-    k=5
+    # print(f"DEBUG: Characters from model.pkl: {characters}")
+    k=3
     query_tfidf = vectorizer.transform([query]).toarray()
     query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
     sims = docs_compressed_normed.dot(query_vec)
@@ -72,7 +72,7 @@ def closest_docs_to_query(query):
     return [characters[i] for i in asort[1:]]
 
 def closest_doc_to_query(query):
-    print(f"DEBUG: Characters from model.pkl: {characters}")
+    # print(f"DEBUG: Characters from model.pkl: {characters}")
     k=5
     query_tfidf = vectorizer.transform([query]).toarray()
     query_vec = normalize(query_tfidf.dot(words_compressed)).squeeze()
@@ -421,7 +421,7 @@ def svd_retrieve_k_sim_comments(character: str, query: str, tfidf_matrix, k = 20
     query_vec_comp = normalize(query_vec.toarray().dot(words_compressed)).squeeze()
     sims = comments_compressed.dot(query_vec_comp)
     ranked = np.argsort(-sims)[:k]
-    print(f"DEBUG: In retrieval function, len(ranked) = {len(ranked)} for character '{character}' and query '{query}'")
+    # print(f"DEBUG: In retrieval function, len(ranked) = {len(ranked)} for character '{character}' and query '{query}'")
 
     result_tuples = [(matched_df.iloc[i]["id"], float(sims[i])) for i in ranked]
     return result_tuples

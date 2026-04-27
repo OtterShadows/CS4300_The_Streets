@@ -178,9 +178,17 @@
                         The Streets
                     </h2>
                     <p class="intro-text">
-                        Curious what the community really thinks about your favorite character?
-                        Search any One Piece character to discover their reputation score, community consensus, and what
-                        people are actually saying about them on r/PirateFolk.
+                        <b>Curious what the community really thinks about your favorite character?
+                        Search any question about the characters of <i>One Piece</i> to see what
+                        fans have to say! See examples below.</b>
+                    </p>
+                    <p class="intro-text">
+                        <i>One Piece</i> is a massively popular manga and anime about 
+                        pirates--specifically the adventures of Monkey D. Luffy and his crew as they sail around the 
+                        globe in search of the legendary treasure known as One Piece. 
+                        By looking at r/PirateFolk, a subreddit dedicated to discussing One Piece characters and pushing 
+                        certain "agendas" around these characters, we can gain insight into how fans perceive different 
+                        characters and how these characters' "social currencies" have evolved over time.
                     </p>
                     <p class="intro-subtext">
                         <svg viewBox="0 0 24 24" width="16" height="16"
@@ -191,16 +199,16 @@
                         </svg> <strong>How it works:</strong> Search for a character name or ask a question like "who's
                         the
                         strongest?" to see detailed community analysis including sentiment trends over time and real
-                        comments from fans.
+                        comments from fans. 
                     </p>
                 </div>
                 <p class="suggestions-title">Try these searches:</p>
                 <div class="suggestions-grid">
                     <button class="suggestion-btn" onclick="searchSuggestion('Who fell off?')">Who fell off?</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the worst?')">Who's the
-                        worst?</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('Luffy')">Luffy</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('bravest')">bravest</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the biggest bum?')">Who's the
+                        biggest bum?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Who is the GOAT?')">Who is the GOAT?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Strongest character')">Strongest character</button>
                 </div>
             </div>
         </div>
@@ -347,8 +355,9 @@
                         </svg>Sentiment Trend Over Time</h3>
                     <p class="graph-context">This chart tracks how the community's sentiment toward <span
                             id="chart-character-name">character</span> has evolved. The line shows the reputation score
-                        (0-10 scale) based on community comments over time on r/PirateFolk. Higher points indicate more
-                        positive sentiment, while dips suggest periods of criticism or debate.</p>
+                        (0-10 scale) based on community comments over time on r/PirateFolk, with each comment raising or lowing the
+                        score based on its sentiment. Higher points indicate periods of praise or "glazing", while dips suggest 
+                        periods of criticism or debate.</p>
                     <div
                         style="position: relative; height: 300px; width: 100%; background: linear-gradient(135deg, #1a1a1e 0%, #2d2d33 100%); border-radius: 4px; border: 1px solid #4a4a52;">
                         <canvas id="ratingsChart"></canvas>
@@ -369,13 +378,25 @@
                                     <circle cx="55" cy="32" r="3" fill="#FFD700" opacity="0.8" />
                                 </svg> Den Den Mushi Messages</h3>
                             <p class="section-subtitle streets-subtitle">What the Grand Line is saying about "<span
-                                    id="query-topic">character</span>" on r/PirateFolk</p>
+                                    id="query-topic">character</span>" on r/PirateFolk? 
+                                Some other pirates have also been mentioned regarding this topic...
+                                click on their names below to see what people have been saying about them!
+
                         </div>
                         <div class="filter-toggle">
                             <label for="filter-switch">Filter sensitive content</label>
                             <input type="checkbox" id="filter-switch" onchange="toggleFilter()">
                             <span class="toggle-label" id="filter-label">OFF</span>
                         </div>
+                        <div class="character-selection">
+                            <input type="radio" id="char1" name="character" value="characterName" checked onchange="selectCharacter(this.value)">
+                            <label for="char1" id="char1-label">characterName</label>
+                            <input type="radio" id="char2" name="character" value="character2" onchange="selectCharacter(this.value)">
+                            <label for="char2" id="char2-label">character2</label>
+                            <input type="radio" id="char3" name="character" value="character3" onchange="selectCharacter(this.value)">
+                            <label for="char3" id="char3-label">character3</label>
+                        </div>
+                        
                     </div>
                     <div id="retrieved-container" class="evidence-list">
                         <!-- Retrieved comments will be populated here -->
@@ -391,6 +412,11 @@
         const characterKeys = ['luffy', 'zoro', 'nami'];
         let currentCharacterIndex = 0;
         let filterEnabled = false;
+        let currentRetrievedComments = [];
+        let currentRetrievedComments2 = [];
+        let currentRetrievedComments3 = [];
+        let currentDirectNameSearch = false;
+        let currentRelatedCharacters = [];
 
         // Convert unix timestamp to human-readable date (YYYY-MM-DD format)
         function formatTimestamp(timestamp) {
@@ -408,6 +434,8 @@
         // Generate LLM-powered character summary
         async function generateCharacterSummary(characterName, characterData) {
             try {
+                let query =document.getElementById('character-search-val').value.toLowerCase().trim();
+
                 const response = await fetch('/character-summary', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -416,7 +444,12 @@
                         reputation_score: characterData.currentRating,
                         consensus: characterData.sentiment,
                         total_comments: characterData.total_comments,
-                        top_comments: characterData.comments.slice(0, 3)
+                        top_comments: characterData.comments.slice(0, 4),
+                        character2: currentRelatedCharacters[0] || '',
+                        character3: currentRelatedCharacters[1] || '',
+                        relevant_comments2: currentRetrievedComments2,
+                        relevant_comments3: currentRetrievedComments3,
+                        message: query
                     })
                 });
 
@@ -692,6 +725,26 @@
             }
         }
 
+        function selectCharacter(character) {
+            if (!character) {
+                return;
+            }
+
+            const retrievedContainer = document.getElementById('retrieved-container');
+            if (retrievedContainer) {
+                retrievedContainer.innerHTML = '';
+            }
+
+            let selectedComments = currentRetrievedComments;
+            if (character === document.getElementById('char2')?.value) {
+                selectedComments = currentRetrievedComments2;
+            } else if (character === document.getElementById('char3')?.value) {
+                selectedComments = currentRetrievedComments3;
+            }
+
+            updateRetrieved({ name: currentCharacterName, retrieved: selectedComments }, selectedComments);
+        }
+
         function searchSuggestion(query) {
             const searchInput = document.getElementById('character-search-val');
             searchInput.value = query;
@@ -751,12 +804,21 @@
                 .then(data => {
                     console.log('Full response data:', data);
                     const characterName = data.character || 'ERROR';
-                    const retrievedComments = data.relevant_comments || 'ERROR';
+                    const retrievedComments = data.relevant_comments || [];
                     const top_dims = data.top_dimensions || [];
                     const qdims = data.query_dimensions || [];
                     const relatedCharacters = data.related_characters || [];
+                    const retrievedComments2 = data.relevant_comments2 || [];
+                    const retrievedComments3 = data.relevant_comments3 || [];
+                    const directNameSearch = data.direct_name_search || false;
                     console.log(`Best character match: "${characterName}"`);
-                    displayCharacterResults(characterName, trimmedQuery, retrievedComments, top_dims, qdims, relatedCharacters);
+                    currentRetrievedComments = retrievedComments;
+                    currentRetrievedComments2 = retrievedComments2;
+                    currentRetrievedComments3 = retrievedComments3;
+                    currentDirectNameSearch = directNameSearch;
+                    currentRelatedCharacters = relatedCharacters;
+                    
+                    displayCharacterResults(characterName, trimmedQuery, retrievedComments, top_dims, qdims, relatedCharacters, directNameSearch);
                 })
                 .catch(err => {
                     console.log(`Error during search for "${characterName}":`, err);
@@ -768,7 +830,7 @@
         // which returns all the character data needed to display on the page (including image_url)
         // (rank, total_comments, sentiment, currentRating, summary, ratings_over_time, comments, retrieved, image_url)
         // Then, display this data on the page.
-        function displayCharacterResults(characterKey, query, retrievedComments, topDimensions, queryDimensions, relatedCharacters) {
+        function displayCharacterResults(characterKey, query, retrievedComments, topDimensions, queryDimensions, relatedCharacters, directNameSearch = false) {
             if (!query) {
                 query = document.getElementById('character-search-val').value.toLowerCase().trim();
             }
@@ -795,6 +857,26 @@
 
                     currentCharacterName = characterKey;
                     if (heroName) heroName.textContent = characterKey
+
+                    // Update radio button labels
+                    document.getElementById('char1-label').textContent = characterKey;
+                    document.getElementById('char1').value = characterKey;
+                    document.getElementById('char2-label').textContent = relatedCharacters[0] || 'N/A';
+                    document.getElementById('char2').value = relatedCharacters[0] || '';
+                    document.getElementById('char3-label').textContent = relatedCharacters[1] || 'N/A';
+                    document.getElementById('char3').value = relatedCharacters[1] || '';
+
+                    const characterSelection = document.querySelector('.character-selection');
+                    if (characterSelection) {
+                        characterSelection.style.display = directNameSearch ? 'none' : 'flex';
+                    }
+
+                    if (!directNameSearch) {
+                        const char1 = document.getElementById('char1');
+                        if (char1) {
+                            char1.checked = true;
+                        }
+                    }
 
                     // Hide previous explanations
                     const reputationExp = document.getElementById('reputation-explanation');
