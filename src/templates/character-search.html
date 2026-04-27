@@ -178,9 +178,17 @@
                         The Streets
                     </h2>
                     <p class="intro-text">
-                        Curious what the community really thinks about your favorite character?
-                        Search any One Piece character to discover their reputation score, community consensus, and what
-                        people are actually saying about them on r/PirateFolk.
+                        <b>Curious what the community really thinks about your favorite character?
+                        Search any question about the characters of <i>One Piece</i> to see what
+                        fans have to say! See examples below.</b>
+                    </p>
+                    <p class="intro-text">
+                        <i>One Piece</i> is a massively popular manga and anime about 
+                        pirates--specifically the adventures of Monkey D. Luffy and his crew as they sail around the 
+                        globe in search of the legendary treasure known as One Piece. 
+                        By looking at r/PirateFolk, a subreddit dedicated to discussing One Piece characters and pushing 
+                        certain "agendas" around these characters, we can gain insight into how fans perceive different 
+                        characters and how these characters' "social currencies" have evolved over time.
                     </p>
                     <p class="intro-subtext">
                         <svg viewBox="0 0 24 24" width="16" height="16"
@@ -191,16 +199,16 @@
                         </svg> <strong>How it works:</strong> Search for a character name or ask a question like "who's
                         the
                         strongest?" to see detailed community analysis including sentiment trends over time and real
-                        comments from fans.
+                        comments from fans. 
                     </p>
                 </div>
                 <p class="suggestions-title">Try these searches:</p>
                 <div class="suggestions-grid">
                     <button class="suggestion-btn" onclick="searchSuggestion('Who fell off?')">Who fell off?</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the worst?')">Who's the
-                        worst?</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('Luffy')">Luffy</button>
-                    <button class="suggestion-btn" onclick="searchSuggestion('bravest')">bravest</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Who\'s the biggest bum?')">Who's the
+                        biggest bum?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Who is the GOAT?')">Who is the GOAT?</button>
+                    <button class="suggestion-btn" onclick="searchSuggestion('Strongest character')">Strongest character</button>
                 </div>
             </div>
         </div>
@@ -347,8 +355,9 @@
                         </svg>Sentiment Trend Over Time</h3>
                     <p class="graph-context">This chart tracks how the community's sentiment toward <span
                             id="chart-character-name">character</span> has evolved. The line shows the reputation score
-                        (0-10 scale) based on community comments over time on r/PirateFolk. Higher points indicate more
-                        positive sentiment, while dips suggest periods of criticism or debate.</p>
+                        (0-10 scale) based on community comments over time on r/PirateFolk, with each comment raising or lowing the
+                        score based on its sentiment. Higher points indicate periods of praise or "glazing", while dips suggest 
+                        periods of criticism or debate.</p>
                     <div
                         style="position: relative; height: 300px; width: 100%; background: linear-gradient(135deg, #1a1a1e 0%, #2d2d33 100%); border-radius: 4px; border: 1px solid #4a4a52;">
                         <canvas id="ratingsChart"></canvas>

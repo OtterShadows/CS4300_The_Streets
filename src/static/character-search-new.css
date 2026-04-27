@@ -429,8 +429,8 @@ body.light-mode::before {
 .read-more-btn {
     font-family: 'Montserrat', sans-serif;
     background: var(--bg-secondary);
-    border: 2px solid var(--accent-blue);
-    color: var(--accent-blue);
+    border: 2px solid var(--pirate-gold);
+    color: var(--pirate-gold);
     padding: 12px 28px;
     border-radius: 24px;
     font-size: 14px;

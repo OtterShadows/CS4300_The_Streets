@@ -159,23 +159,23 @@ def register_chat_route(app, json_search_k=None):
             # Build context from top comments
             comments_context = ""
             if top_comments:
-                comments_context = "\nTop community comments:\n" + "\n".join(
-                    f"- {c.get('text', '')[:150]}" for c in top_comments[:5]
+                comments_context = "Relevant comments for " + char_name + ":\n" + "\n".join(
+                    f"- {c.get('text', '')[:500]}" for c in top_comments[:7]
                 )
 
             comments_context2 = ""
             if relevant_comments2:
                 comments_context2 += "\n\nRelevant comments for " + character2 + ":\n" + "\n".join(
-                    f"- {c.get('text', '')[:150]}" for c in relevant_comments2[:2]
+                    f"- {c.get('text', '')[:150]}" for c in relevant_comments2[:4]
                 )
             
             comments_context3 = ""
             if relevant_comments3:
                 comments_context3 += "\n\nRelevant comments for " + character3 + ":\n" + "\n".join(
-                    f"- {c.get('text', '')[:150]}" for c in relevant_comments3[:2]
+                    f"- {c.get('text', '')[:150]}" for c in relevant_comments3[:4]
                 )
 
-            prompt = f"""Generate a brief, engaging 2-3 sentence summary about the community's perception of {char_name}.
+            prompt = f"""Generate an engaging 4-5 sentence summary about the community's perception of {char_name}.
 
                 Use this data:
                 - Query: {query}
@@ -187,6 +187,10 @@ def register_chat_route(app, json_search_k=None):
                 - Retrieved comments for 2nd character: {comments_context2}
                 - Retrieved comments for 3rd character: {comments_context3}
                 
+                IMPORTANT: There should always be information that comes from the comments. If you say a second
+                character match is also a contender for the query, you must cite some detail in the retrieved
+                comments to back that up.
+
 
                 Write in a conversational tone that captures the community's sentiment. Be specific and insightful.
                 Be absolutely sure to discuss how the comments support {char_name} being the returned character for
@@ -195,10 +199,14 @@ def register_chat_route(app, json_search_k=None):
                 you may use the reputation score and consensus to inform the summary, but do not just restate them.
 
                 {character2} and {character3} are the second and third place matches for the query.
-                If there is a strong case based on the retrieved comments for either the 2nd character or 3rd,
-                you may mention them in the summary to show that the answer to the question (i.e. the query) is a
-                point of debate in the fandom.
+                When there is any evidence based on the retrieved comments for either the 2nd character or 3rd
+                that one of them could also be a reasonable answer to the query,
+                mention them in the summary and cite the evidence that supports them being a contender.
+                
+                ALSO IMPORTANT:If you are given no relevant comments, you should mention that no relevant comments were able to be found.
                 """
+
+            # print(f"DEBUG: LLM prompt for character summary:\n{prompt}\n")
 
             messages = [
                 {
